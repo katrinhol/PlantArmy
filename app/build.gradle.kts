@@ -81,6 +81,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
+    // WorkManager für Hintergrundaufgaben
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

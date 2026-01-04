@@ -53,4 +53,5 @@ data class Plant(
         // true wenn Heute >= nächstes Datum
         return !LocalDate.now().isBefore(nextDate)
     }
+
 }
