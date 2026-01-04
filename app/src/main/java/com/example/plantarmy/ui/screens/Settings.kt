@@ -11,54 +11,51 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.plantarmy.notifications.PlantReminderWorker
 
 @Composable
 fun SettingsScreen() {
 
-    // ZUSTAND FÜR NOTES (Switch)
-    var notificationsEnabled by remember { mutableStateOf(true) } // Standard: EIN
+    // Zustand für Switch
+    var notificationsEnabled by remember { mutableStateOf(true) }
 
-    // ZUSTAND FÜR DAS DROPDOWN
-    var expanded by remember { mutableStateOf(false) } //Dropdown sichtbar oder nicht - Standard: NEIN
-    var selectedTime by remember { mutableStateOf("09:00") } // Standard: 9:00
+    // Zustand für Dropdown
+    var expanded by remember { mutableStateOf(false) }
+    var selectedTime by remember { mutableStateOf("09:00") }
 
-    // UHRZEIT-LISTE
+    // Uhrzeit-Liste
     val timeOptions = remember {
-        // Von 0 bis 23 - in 3er Schritten
         (0..23 step 3).map { hour ->
-            // Zahl in String (3 -> 03:00)
             "%02d:00".format(hour)
         }
     }
 
-    // ----------------------------------------  ANZEIGE ---------------------------------------- //
-
-    Column( // Ordnet alle Elemente vertikal unterinander
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
 
-        // ÜBERSCHRIFT
         Text(
             text = "Einstellungen",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
 
-        // PLATZHALTER
         Spacer(modifier = Modifier.height(32.dp))
 
-
+        // --- Benachrichtigungen Switch ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
             Column {
                 Text("Benachrichtigungen", fontWeight = FontWeight.SemiBold)
                 Text(
@@ -77,7 +74,7 @@ fun SettingsScreen() {
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Auswahl der Uhrzeit (Schönes Dropdown) ---
+        // --- Auswahl der Uhrzeit (Dropdown) ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -85,9 +82,7 @@ fun SettingsScreen() {
         ) {
             Text("Benachrichtigungszeit", fontWeight = FontWeight.SemiBold)
 
-            // Box für das Dropdown-Menü
             Box {
-                // Ein sichtbarer Rahmen um die Auswahl
                 Row(
                     modifier = Modifier
                         .border(
@@ -95,7 +90,7 @@ fun SettingsScreen() {
                             color = Color.Gray,
                             shape = RoundedCornerShape(8.dp)
                         )
-                        .clickable { expanded = true } // Macht die ganze Box klickbar
+                        .clickable { expanded = true }
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -111,7 +106,6 @@ fun SettingsScreen() {
                     )
                 }
 
-                // Das eigentliche Menü (klappt unter der Box auf)
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
@@ -128,5 +122,25 @@ fun SettingsScreen() {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // --- Debug: Worker sofort auslösen ---
+        DebugTriggerReminderWorkerButton()
+    }
+}
+
+@Composable
+fun DebugTriggerReminderWorkerButton() {
+    val context = LocalContext.current
+
+    Button(
+        onClick = {
+            val request = OneTimeWorkRequestBuilder<PlantReminderWorker>().build()
+            WorkManager.getInstance(context).enqueue(request)
+        },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text("🔔 Benachrichtigung testen 🔔")
     }
 }
