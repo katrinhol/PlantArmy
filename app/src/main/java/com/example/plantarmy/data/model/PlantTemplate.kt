@@ -14,7 +14,8 @@ data class PlantTemplate(
     val defaultFertilizingIntervalDays: Int,
     val lightRequirement: String,
     val description: String,
-    val difficultyLevel: String
+    val difficultyLevel: String,
+    val imageUrl: String? = null
 ) {
     /**
      * Erstellt eine echte Pflanze basierend auf dieser Vorlage.
@@ -25,6 +26,7 @@ data class PlantTemplate(
             customName = customName,
             location = location,
             templateId = this.id,
+            imageUrl = this.imageUrl,
             wateringIntervalDays = this.defaultWateringIntervalDays,
             fertilizingIntervalDays = this.defaultFertilizingIntervalDays
             //Description, difficulty, light requirement nicht eingebaut

@@ -12,6 +12,7 @@ data class Plant(
     var customName: String,
     var location: String,
     val templateId: Int? = null, // TemplateID API?
+    var imageUrl: String? = null,
 
     // PFLEGE INTERVALL (in Tagen)
     var wateringIntervalDays: Int,

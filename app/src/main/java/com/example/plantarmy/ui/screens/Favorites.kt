@@ -98,11 +98,12 @@ fun FavoritePlantItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 1. Das Bild
-            val imageUri = plant.photos.firstOrNull()?.uri
+            // 1. Das Bild (API-URL oder lokales Foto)
+            val imageModel: Any? = plant.imageUrl ?: plant.photos.firstOrNull()?.uri
 
-            if (imageUri != null) {
+            if (imageModel != null) {
                 AsyncImage(
-                    model = imageUri,
+                    model = imageModel,
                     contentDescription = "Foto von ${plant.customName}",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
