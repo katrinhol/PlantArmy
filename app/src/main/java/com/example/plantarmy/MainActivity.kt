@@ -1,5 +1,6 @@
 package com.example.plantarmy
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,17 +26,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.plantarmy.ui.screens.CreatePlantScreen
-import com.example.plantarmy.ui.screens.PlantArmyTheme
 import com.example.plantarmy.ui.screens.FavoritesScreen
+import com.example.plantarmy.ui.screens.PlantArmyTheme
 import com.example.plantarmy.ui.screens.SettingsScreen
 import com.example.plantarmy.ui.screens.PlantRegisterScreen
+import com.example.plantarmy.workers.ReminderScheduler
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        ReminderScheduler.start(applicationContext)
+
         enableEdgeToEdge()
         setContent {
             PlantArmyTheme {
+                RequestNotificationPermissionIfNeeded()
                 PlantArmyScreen()
             }
         }
@@ -53,7 +62,8 @@ enum class AppScreen {
 // ------------------------------------- HAUPTANZEIGE --------------------------------------- //
 @Composable
 fun PlantArmyScreen() {
-    // CURRENT STATE -> HOME
+
+    // CURRENT STATE -> HOME (remember = lokale Variabel; mutableStatOf = beobachtbare Variable)
     var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
     // Zwischenspeicher - TODO - Warum hier in Main?
     var editingPlantId by remember { mutableStateOf<String?>(null) }
@@ -223,5 +233,20 @@ fun PlantMenuButton(text: String, onClick: () -> Unit) {
 fun PlantArmyPreview() {
     PlantArmyTheme {
         PlantArmyScreen()
+    }
+}
+
+@OptIn(com.google.accompanist.permissions.ExperimentalPermissionsApi::class)
+@Composable
+fun RequestNotificationPermissionIfNeeded() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val permissionState =
+            rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
+
+        SideEffect {
+            if (!permissionState.status.isGranted) {
+                permissionState.launchPermissionRequest()
+            }
+        }
     }
 }

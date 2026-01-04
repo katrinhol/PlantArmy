@@ -3,9 +3,7 @@ package com.example.plantarmy.data.model
 import java.time.LocalDateTime
 import java.util.UUID
 
-/**
- * Für geplante Erinnerungen
- */
+// Für Erinnerungen
 
 data class Notification(
     val id: String = UUID.randomUUID().toString(),

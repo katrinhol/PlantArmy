@@ -11,14 +11,14 @@ class PlantRepository(private val context: Context) {
     private val gson = Gson()
     private val fileName = "my_plants.json"
 
-    // Speichert eine neue Pflanze
+    // NEUE PFLANZE SPEICHERN
     fun addPlant(plant: Plant) {
         val currentList = getAllPlants().toMutableList()
         currentList.add(plant)
         saveList(currentList)
     }
 
-    // --- NEU: Pflanze aktualisieren ---
+    // PFLANZE AKTUALISIEREN
     fun updatePlant(updatedPlant: Plant) {
         val currentList = getAllPlants().toMutableList()
         // Wir suchen den Index der Pflanze mit der gleichen ID
@@ -29,19 +29,19 @@ class PlantRepository(private val context: Context) {
         }
     }
 
-    // --- NEU: Pflanze löschen ---
+    //PFLANZE LÖSCHEN
     fun deletePlant(plantId: String) {
         val currentList = getAllPlants().toMutableList()
         currentList.removeAll { it.id == plantId }
         saveList(currentList)
     }
 
-    // --- NEU: Einzelne Pflanze laden ---
+    // EINZELNE PFLANZE LADEN
     fun getPlantById(id: String): Plant? {
         return getAllPlants().find { it.id == id }
     }
 
-    // Lädt alle Pflanzen
+    // LALLE PFLANZEN LADEN
     fun getAllPlants(): List<Plant> {
         val file = File(context.filesDir, fileName)
         if (!file.exists()) return emptyList()
@@ -56,6 +56,7 @@ class PlantRepository(private val context: Context) {
         }
     }
 
+    // LISTE SPEICHERN
     private fun saveList(plants: List<Plant>) {
         val jsonString = gson.toJson(plants)
         val file = File(context.filesDir, fileName)
