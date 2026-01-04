@@ -29,7 +29,7 @@ fun PerenualPlantDto.toPlantTemplate(): PlantTemplate {
     // Ein sicheres PlantTemplate zurückgeben
     return PlantTemplate(
         id = this.id,
-        name = this.commonName ?: "Unbekannte Pflanze",
+        name = this.commonName.ifBlank { "Unbekannte Pflanze" }, // *** Fallback-Wert
         // Standard wird erster wissenschaftlicher Name oder Platzhalter gewählt
         botanicName = this.scientificName.firstOrNull() ?: "",
         defaultWateringIntervalDays = wInterval,

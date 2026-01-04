@@ -9,7 +9,7 @@ interface PerenualApiService {
 
     // Funktion, um Pflanzenliste zu holen
     // Dokumentation: https://perenual.com/docs/api
-    @GET("species-list")
+    @GET("api/v2/species-list")
     suspend fun getPlants(
         // 1. API Key aus Konfiguration laden
         @Query("key") apiKey: String = BuildConfig.PERENUAL_API_KEY,

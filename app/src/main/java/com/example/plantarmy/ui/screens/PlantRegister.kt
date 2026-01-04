@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel // Wichtig!
 import com.example.plantarmy.data.model.PlantTemplate
 import com.example.plantarmy.ui.viewmodel.PlantRegisterViewModel
+import androidx.compose.ui.platform.LocalContext
+import com.example.plantarmy.data.repository.PlantRepository
 
 @Composable
 fun PlantRegisterScreen(
@@ -23,6 +25,9 @@ fun PlantRegisterScreen(
     onBack: () -> Unit // Funktion um zurück zu gehen
 ) {
     var searchQuery by remember { mutableStateOf("") }
+
+    val context = LocalContext.current // *** Wichtig: gibt den Android-Context im Compose
+    val plantRepo = remember { PlantRepository(context) } // *** Wichtig: sorgt dafür, dass PlantRepository nicht bei jedem Recompose neu gebaut wird
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
@@ -64,7 +69,17 @@ fun PlantRegisterScreen(
             // Die Liste der Ergebnisse
             LazyColumn {
                 items(viewModel.foundPlants) { plantTemplate ->
-                    PlantListItem(plantTemplate)
+                    PlantListItem(
+                        plant = plantTemplate,
+                        onClick = {
+                            val newPlant = plantTemplate.createPlant(
+                                customName = plantTemplate.name,
+                                location = "Unbekannt"
+                            )
+                            plantRepo.addPlant(newPlant)
+                            onBack()
+                        }
+                    )
                 }
             }
         }
@@ -79,8 +94,9 @@ fun PlantRegisterScreen(
 
 // Eine einzelne Zeile in der Liste
 @Composable
-fun PlantListItem(plant: PlantTemplate) {
+fun PlantListItem(plant: PlantTemplate, onClick: () -> Unit) {
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
