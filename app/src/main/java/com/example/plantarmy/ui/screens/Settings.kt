@@ -18,39 +18,47 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SettingsScreen() {
 
-    // Zustand für den Switch
-    var notificationsEnabled by remember { mutableStateOf(true) }
+    // ZUSTAND FÜR NOTES (Switch)
+    var notificationsEnabled by remember { mutableStateOf(true) } // Standard: EIN
 
     // ZUSTAND FÜR DAS DROPDOWN
-    var expanded by remember { mutableStateOf(false) }
-    var selectedTime by remember { mutableStateOf("09:00") }
+    var expanded by remember { mutableStateOf(false) } //Dropdown sichtbar oder nicht - Standard: NEIN
+    var selectedTime by remember { mutableStateOf("09:00") } // Standard: 9:00
 
-    // Generiere die Liste: 00:00, 03:00 ... 21:00
+    // UHRZEIT-LISTE
     val timeOptions = remember {
+        // Von 0 bis 23 - in 3er Schritten
         (0..23 step 3).map { hour ->
+            // Zahl in String (3 -> 03:00)
             "%02d:00".format(hour)
         }
     }
 
-    Column(
+    // ----------------------------------------  ANZEIGE ---------------------------------------- //
+
+    Column( // Ordnet alle Elemente vertikal unterinander
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+
+        // ÜBERSCHRIFT
         Text(
             text = "Einstellungen",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
 
+        // PLATZHALTER
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- Toggle für Benachrichtigungen ---
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+
             Column {
                 Text("Benachrichtigungen", fontWeight = FontWeight.SemiBold)
                 Text(

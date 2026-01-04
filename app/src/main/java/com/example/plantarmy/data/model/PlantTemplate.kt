@@ -12,9 +12,9 @@ data class PlantTemplate(
     val botanicName: String,
     val defaultWateringIntervalDays: Int,
     val defaultFertilizingIntervalDays: Int,
-    val lightRequirement: String, // z.B. "Sonnig", "Halbschatten"
+    val lightRequirement: String,
     val description: String,
-    val difficultyLevel: String // z.B. "Einfach"
+    val difficultyLevel: String
 ) {
     /**
      * Erstellt eine echte Pflanze basierend auf dieser Vorlage.
@@ -27,6 +27,7 @@ data class PlantTemplate(
             templateId = this.id,
             wateringIntervalDays = this.defaultWateringIntervalDays,
             fertilizingIntervalDays = this.defaultFertilizingIntervalDays
+            //Description, difficulty, light requirement nicht eingebaut
         )
     }
 

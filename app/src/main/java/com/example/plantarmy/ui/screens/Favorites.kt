@@ -7,8 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.InvertColors // Das ist das "Tropfen"-Icon in der Standard-Lib
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,10 +28,8 @@ import com.example.plantarmy.ui.viewmodel.FavoritesViewModel
 @Composable
 fun FavoritesScreen(
     viewModel: FavoritesViewModel = viewModel(),
-    // NEU: Callback, wenn eine Pflanze angeklickt wird (gibt die ID zurück)
     onPlantClick: (String) -> Unit
 ) {
-    // Daten neu laden, wenn der Screen angezeigt wird
     LaunchedEffect(Unit) {
         viewModel.loadPlants()
     }
@@ -71,7 +69,6 @@ fun FavoritesScreen(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 items(viewModel.plants) { plant ->
-                    // NEU: Wir übergeben den Klick weiter
                     FavoritePlantItem(
                         plant = plant,
                         onClick = { onPlantClick(plant.id) }
@@ -85,14 +82,14 @@ fun FavoritesScreen(
 @Composable
 fun FavoritePlantItem(
     plant: Plant,
-    onClick: () -> Unit // NEU: Klick-Funktion
+    onClick: () -> Unit
 ) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() } // NEU: Macht die ganze Karte anklickbar
+            .clickable { onClick() }
     ) {
         Row(
             modifier = Modifier
@@ -127,7 +124,7 @@ fun FavoritePlantItem(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // 2. Text Informationen
+            // 2. Text Informationen (Links)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = plant.customName,
@@ -144,18 +141,38 @@ fun FavoritePlantItem(
                 }
             }
 
-            // 3. Kleiner Gieß-Indikator
+            // 3. Intervalle (Rechts)
             Column(horizontalAlignment = Alignment.End) {
+
+                // A) Gieß-Intervall (Blauer Tropfen)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = null,
-                        tint = Color(0xFF2196F3),
+                        imageVector = Icons.Default.InvertColors, // Tropfenform
+                        contentDescription = "Gießen",
+                        tint = Color(0xFF2196F3), // Blau
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${plant.wateringIntervalDays} Tage",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // B) Dünge-Intervall (Grüner Tropfen)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.InvertColors, // Tropfenform
+                        contentDescription = "Düngen",
+                        tint = Color(0xFF4CAF50), // Grün
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${plant.fertilizingIntervalDays} Tage",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )

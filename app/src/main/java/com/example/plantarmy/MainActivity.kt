@@ -53,7 +53,8 @@ enum class AppScreen {
 // ------------------------------------- HAUPTANZEIGE --------------------------------------- //
 @Composable
 fun PlantArmyScreen() {
-    // CURRENT STATE -> HOME
+
+    // CURRENT STATE -> HOME (remember = lokale Variabel; mutableStatOf = beobachtbare Variable)
     var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
     // Zwischenspeicher - TODO - Warum hier in Main?
     var editingPlantId by remember { mutableStateOf<String?>(null) }
