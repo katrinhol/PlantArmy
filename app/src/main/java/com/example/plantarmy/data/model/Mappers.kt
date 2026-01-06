@@ -36,6 +36,7 @@ fun PerenualPlantDto.toPlantTemplate(): PlantTemplate {
         defaultFertilizingIntervalDays = 14, // Standardwert
         lightRequirement = light,
         description = "Automatisch importiert von Perenual API",
-        difficultyLevel = "Mittel"
+        difficultyLevel = "Mittel" ,
+                imageUrl = this.defaultImage?.regularUrl
     )
 }

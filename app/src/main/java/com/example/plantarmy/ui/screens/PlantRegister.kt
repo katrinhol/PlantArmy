@@ -17,6 +17,9 @@ import com.example.plantarmy.data.model.PlantTemplate
 import com.example.plantarmy.ui.viewmodel.PlantRegisterViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.example.plantarmy.data.repository.PlantRepository
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun PlantRegisterScreen(
@@ -93,7 +96,62 @@ fun PlantRegisterScreen(
 }
 
 // Eine einzelne Zeile in der Liste
+
 @Composable
+fun PlantListItem(
+    plant: PlantTemplate,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // 🌿 Pflanzenbild
+            AsyncImage(
+                model = plant.imageUrl,
+                contentDescription = plant.name,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(MaterialTheme.shapes.medium),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column {
+                Text(
+                    text = plant.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "Botanisch: ${plant.botanicName}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // ✅ Nur noch Gießen anzeigen
+                SuggestionChip(
+                    onClick = {},
+                    label = { Text("Gießen: Alle ${plant.defaultWateringIntervalDays} Tage") }
+                )
+            }
+        }
+    }
+}
+
+/*@Composable
 fun PlantListItem(plant: PlantTemplate, onClick: () -> Unit) {
     Card(
         onClick = onClick,
@@ -115,3 +173,5 @@ fun PlantListItem(plant: PlantTemplate, onClick: () -> Unit) {
         }
     }
 }
+
+ */
