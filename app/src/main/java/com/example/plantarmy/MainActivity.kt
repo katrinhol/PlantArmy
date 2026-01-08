@@ -33,6 +33,10 @@ import com.example.plantarmy.ui.screens.PlantRegisterScreen
 import com.example.plantarmy.workers.ReminderScheduler
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import androidx.compose.material.icons.filled.List
+import com.example.plantarmy.ui.screens.AllPlantsScreen
+
+import com.example.plantarmy.ui.screens.PlantDetailsScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -56,7 +60,7 @@ val PastelGreenBackground = Color(0xFFF1F8E9)
 
 // --------------------------------- DEFINITION DER SCREENS --------------------------------- //
 enum class AppScreen {
-    HOME, FAVORITES, SETTINGS, PLANT_REGISTER, CREATE_PLANT,
+    HOME, FAVORITES, ALL_PLANTS, SETTINGS, PLANT_REGISTER, CREATE_PLANT, PLANT_DETAILS
 }
 
 // ------------------------------------- HAUPTANZEIGE --------------------------------------- //
@@ -67,6 +71,7 @@ fun PlantArmyScreen() {
     var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
     // Zwischenspeicher - TODO - Warum hier in Main?
     var editingPlantId by remember { mutableStateOf<String?>(null) }
+    var selectedSpeciesId by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -75,7 +80,7 @@ fun PlantArmyScreen() {
         // UNTERE LEISTE
         bottomBar = {
             // Leiste nur anzeigen, wenn nicht in Register oder Create Plant Maske
-            if (currentScreen != AppScreen.PLANT_REGISTER && currentScreen != AppScreen.CREATE_PLANT) {
+            if (currentScreen != AppScreen.PLANT_REGISTER && currentScreen != AppScreen.CREATE_PLANT && currentScreen != AppScreen.PLANT_DETAILS) {
 
                 NavigationBar(containerColor = Color.White) {
                     NavigationBarItem(
@@ -92,6 +97,18 @@ fun PlantArmyScreen() {
                         icon = { Icon(Icons.Default.Star, contentDescription = "Favorites", tint = if (currentScreen == AppScreen.FAVORITES) Color(0xFFFFD700) else Color.Gray) },
                         selected = currentScreen == AppScreen.FAVORITES,
                         onClick = { currentScreen = AppScreen.FAVORITES }
+                    )
+
+                    NavigationBarItem(
+                        icon = {
+                            Icon(
+                                Icons.Default.List,
+                                contentDescription = "All Plants",
+                                tint = if (currentScreen == AppScreen.ALL_PLANTS) PlantGreen else Color.Gray
+                            )
+                        },
+                        selected = currentScreen == AppScreen.ALL_PLANTS,
+                        onClick = { currentScreen = AppScreen.ALL_PLANTS }
                     )
                 }
             }
@@ -123,6 +140,25 @@ fun PlantArmyScreen() {
                         currentScreen = AppScreen.CREATE_PLANT
                     }
                 )
+
+                AppScreen.ALL_PLANTS -> AllPlantsScreen(
+                    onPlantClick = { id ->
+                        selectedSpeciesId = id
+                        currentScreen = AppScreen.PLANT_DETAILS
+                    }
+                )
+
+                AppScreen.PLANT_DETAILS -> {
+                    val id = selectedSpeciesId
+                    if (id != null) {
+                        PlantDetailsScreen(
+                            speciesId = id,
+                            onBack = { currentScreen = AppScreen.ALL_PLANTS }
+                        )
+                    } else {
+                        currentScreen = AppScreen.ALL_PLANTS
+                    }
+                }
 
                 // State: SETTINGS-SCREEN
                 AppScreen.SETTINGS -> SettingsScreen()

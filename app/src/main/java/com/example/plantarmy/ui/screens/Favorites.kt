@@ -97,7 +97,6 @@ fun FavoritePlantItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Das Bild
             // 1. Das Bild (API-URL oder lokales Foto)
             val imageModel: Any? = plant.imageUrl ?: plant.photos.firstOrNull()?.uri
 
