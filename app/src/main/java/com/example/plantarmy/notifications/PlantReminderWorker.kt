@@ -5,6 +5,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.plantarmy.data.repository.PlantRepository
 import java.time.LocalDate
+import com.example.plantarmy.notifications.NotificationSettings
+
 
 class PlantReminderWorker(
     context: Context,
@@ -12,6 +14,11 @@ class PlantReminderWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+
+        if (!NotificationSettings.areNotificationsEnabled(applicationContext)) {
+            return Result.success()
+        }
+
         val repo = PlantRepository(applicationContext)
         val allPlants = repo.getAllPlants()
 
@@ -21,9 +28,10 @@ class PlantReminderWorker(
             .filter { it.remindersEnabled }
             .forEach { plant ->
 
-                /* ----------------------------
+                /**
                  * GIESSEN
-                 * ---------------------------- */
+                 **/
+
                 if (
                     plant.isWateringDue() &&
                     !repo.wasReminderSentToday(
@@ -48,9 +56,10 @@ class PlantReminderWorker(
                     )
                 }
 
-                /* ----------------------------
-                 * 🌿 DÜNGEN
-                 * ---------------------------- */
+                /**
+                 * DÜNGEN
+                 **/
+
                 val fertilizingDue =
                     !today.isBefore(plant.calculateNextFertilizingDate())
 

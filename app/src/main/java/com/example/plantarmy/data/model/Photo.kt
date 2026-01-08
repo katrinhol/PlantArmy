@@ -11,5 +11,5 @@ data class Photo(
     // DATEIPFAD zum Bild (URI als String)
     val uri: String,
 
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    //val createdAt: LocalDateTime = LocalDateTime.now()
 )

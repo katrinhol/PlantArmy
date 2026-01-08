@@ -5,6 +5,7 @@ import com.example.plantarmy.data.api.PerenualResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+//Retrofit Service
 interface PerenualApiService {
 
     // Funktion, um Pflanzenliste zu holen

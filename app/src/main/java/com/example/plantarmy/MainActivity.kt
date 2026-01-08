@@ -36,11 +36,14 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
 // Deep-link keys (aus NotificationIntent)
-private const val EXTRA_OPEN_SCREEN = "open_screen"   // z.B. "FAVORITES"
-private const val EXTRA_PLANT_ID = "plant_id"         // z.B. "uuid..."
+private const val EXTRA_OPEN_SCREEN = "open_screen"
+private const val EXTRA_PLANT_ID = "plant_id"
 private const val SCREEN_FAVORITES = "FAVORITES"
 
 class MainActivity : ComponentActivity() {
+
+
+    // --------------------------------- BENACHRICHTIGUNGEN --------------------------------- //
 
     // Diese States brauchen wir, damit onNewIntent() Compose updaten kann
     private val deepLinkScreen = mutableStateOf<AppScreen?>(null)
@@ -233,7 +236,6 @@ fun PlantMenuButton(text: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp),
-        // ✅ Fix: ButtonDefaults statt ButtonColors(...)
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.White,
             contentColor = Color.Black,

@@ -29,7 +29,7 @@ data class PlantTemplate(
             imageUrl = this.imageUrl, // Foto aus dem Register übernehmen
             wateringIntervalDays = this.defaultWateringIntervalDays,
             fertilizingIntervalDays = this.defaultFertilizingIntervalDays
-            //Description, difficulty, light requirement nicht eingebaut
+
         )
     }
 

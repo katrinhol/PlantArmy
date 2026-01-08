@@ -11,17 +11,30 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.plantarmy.MainActivity
 import com.example.plantarmy.R
 
+
+/**
+ * Helper-Klasse, die
+ * Notification-Channel erstellt,
+ * Benachrichtigungen anzeigt
+ * Beim klick auf Notification App öffent, zu Favorites (PlantId)
+ */
+
 object NotificationHelper {
 
     private const val CHANNEL_ID = "plant_army_channel"
 
     fun createChannel(context: Context) {
+        //ältere Android-Versionen ignorieren Channels -> kein Crash
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            //Channel erzeugen:
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Plant Notifications",
-                NotificationManager.IMPORTANCE_HIGH
+                "Plant Army Notifications",
+                NotificationManager.IMPORTANCE_HIGH //= Pop-up, Sound, Heads-up notification
             )
+
+            //wenn Channel schon existiert -> passiert nichts
             val manager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
@@ -37,9 +50,14 @@ object NotificationHelper {
     ) {
         createChannel(context)
 
+
+        //Bei Klick -> Main Activity
         val intent = Intent(context, MainActivity::class.java).apply {
+            //Deep-Linking zu Main
             putExtra("open_screen", "FAVORITES")
             putExtra("plant_id", plantId)
+            //Single-Top -> nutzt vorhandene Activity, kein mehrfaches Öffnen
+            //Clear-Top -> räumt alte screens auf
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
 
@@ -47,17 +65,21 @@ object NotificationHelper {
             context,
             id,
             intent,
+            //update_current -> überschreibt alte Extras (ID)
+            //Immutable -> intent unveränderlich
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        //Notification bauen:
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(text)
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
+            .setAutoCancel(true) //notification verschwindet danach automatisch
             .build()
 
+        // verhindert Fehler, wenn Notifications deaktiviert sind
         if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
             NotificationManagerCompat.from(context).notify(id, notification)
         }

@@ -11,7 +11,7 @@ data class Plant(
     val id: String = UUID.randomUUID().toString(), // Automatische Eindeutige ID in APP
     var customName: String,
     var location: String,
-    val templateId: Int? = null, // TemplateID API?
+    val templateId: Int? = null,
     var imageUrl: String? = null, //
 
     // PFLEGE INTERVALL (in Tagen)
@@ -26,13 +26,6 @@ data class Plant(
 
     //Speichert Fotos
     val photos: MutableList<Photo> = mutableListOf(),
-
-    // VERKNÜPFTE DATEN
-    //(Listen anfangs leer initialisiert)
-
-    //val photos: MutableList<Photo> = mutableListOf(),
-    //val careHistory: MutableList<CareAction> = mutableListOf(),
-    //val createdAt: LocalDate = LocalDate.now()
 
 ) {
     // LOGIK: NÄCHSTES GIESSDATUM
