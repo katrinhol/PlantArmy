@@ -4,6 +4,7 @@ import com.example.plantarmy.BuildConfig // WICHTIG: Damit auf den gespeicherten
 import com.example.plantarmy.data.api.PerenualResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
+import retrofit2.http.Path
 
 //Retrofit Service
 interface PerenualApiService {
@@ -23,6 +24,17 @@ interface PerenualApiService {
 
         // 4. Filter für Zimmerpflanzen (1 = ja, 0 = nein).
         // Standardmäßig auf 1, Zimmerpflanzen zuerst.
-        @Query("indoor") indoor: Int = 1
+        @Query("indoor") indoor: Int? = null,
+
+        // Filter für die Bibliothek
+        @Query("watering") watering: String? = null,  // frequent, average, minimum, none
+        @Query("sunlight") sunlight: String? = null  // full_shade, part_shade, sun-part_shade, full_sun
     ): PerenualResponse
+
+
+    @GET("api/v2/species/details/{id}")
+    suspend fun getPlantDetails(
+        @Path("id") id: Int,
+        @Query("key") apiKey: String = BuildConfig.PERENUAL_API_KEY
+    ): PerenualPlantDetailDto
 }

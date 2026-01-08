@@ -29,11 +29,16 @@ import androidx.compose.ui.unit.sp
 import com.example.plantarmy.ui.screens.CreatePlantScreen
 import com.example.plantarmy.ui.screens.FavoritesScreen
 import com.example.plantarmy.ui.screens.PlantArmyTheme
+import com.example.plantarmy.ui.screens.SettingsScreen
 import com.example.plantarmy.ui.screens.PlantRegisterScreen
 import com.example.plantarmy.ui.screens.SettingsScreen
 import com.example.plantarmy.workers.ReminderScheduler
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import androidx.compose.material.icons.filled.List
+import com.example.plantarmy.ui.screens.AllPlantsScreen
+
+import com.example.plantarmy.ui.screens.PlantDetailsScreen
 
 // Deep-link keys (aus NotificationIntent)
 private const val EXTRA_OPEN_SCREEN = "open_screen"
@@ -95,7 +100,7 @@ val PastelGreenBackground = Color(0xFFF1F8E9)
 
 // --------------------------------- DEFINITION DER SCREENS --------------------------------- //
 enum class AppScreen {
-    HOME, FAVORITES, SETTINGS, PLANT_REGISTER, CREATE_PLANT,
+    HOME, FAVORITES, ALL_PLANTS, SETTINGS, PLANT_REGISTER, CREATE_PLANT, PLANT_DETAILS
 }
 
 // ------------------------------------- HAUPTANZEIGE --------------------------------------- //
@@ -106,6 +111,7 @@ fun PlantArmyScreen(
 ) {
     var currentScreen by remember { mutableStateOf(initialScreen) }
     var editingPlantId by remember { mutableStateOf<String?>(null) }
+    var selectedSpeciesId by remember { mutableStateOf<Int?>(null) }
 
     // Wenn ein DeepLink später reinkommt (onNewIntent), soll UI reagieren:
     LaunchedEffect(initialScreen, highlightPlantId) {
@@ -116,8 +122,11 @@ fun PlantArmyScreen(
         modifier = Modifier.fillMaxSize(),
         containerColor = PastelGreenBackground,
 
+        // UNTERE LEISTE
         bottomBar = {
+            // Leiste nur anzeigen, wenn nicht in Register oder Create Plant Maske
             if (currentScreen != AppScreen.PLANT_REGISTER && currentScreen != AppScreen.CREATE_PLANT) {
+
                 NavigationBar(containerColor = Color.White) {
                     NavigationBarItem(
                         icon = {
@@ -152,20 +161,40 @@ fun PlantArmyScreen(
                         selected = currentScreen == AppScreen.FAVORITES,
                         onClick = { currentScreen = AppScreen.FAVORITES }
                     )
+
+                    NavigationBarItem(
+                        icon = {
+                            Icon(
+                                Icons.Default.List,
+                                contentDescription = "All Plants",
+                                tint = if (currentScreen == AppScreen.ALL_PLANTS) PlantGreen else Color.Gray
+                            )
+                        },
+                        selected = currentScreen == AppScreen.ALL_PLANTS,
+                        onClick = { currentScreen = AppScreen.ALL_PLANTS }
+                    )
                 }
             }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
+            //when wie switch
             when (currentScreen) {
+
+                // State: HOME-SCREEN
                 AppScreen.HOME -> HomeScreenContent(
+
+                    // Pflanze anlegen - Button -> PLANT_REGISTER-SCREEN
                     onRegisterClick = { currentScreen = AppScreen.PLANT_REGISTER },
+
+                    // Pflanze erstellen - Button -> CREATE_PLANT-SCREEN
                     onCreateClick = {
                         editingPlantId = null
                         currentScreen = AppScreen.CREATE_PLANT
                     }
                 )
 
+                // State: FAVORITES-SCREEN
                 AppScreen.FAVORITES -> FavoritesScreen(
                     // TODO: FavoritesScreen sollte highlightPlantId annehmen und markieren
                     // z.B. FavoritesScreen(highlightPlantId = highlightPlantId, onPlantClick = { ... })
@@ -175,17 +204,43 @@ fun PlantArmyScreen(
                     }
                 )
 
+                AppScreen.ALL_PLANTS -> AllPlantsScreen(
+                    onPlantClick = { id ->
+                        selectedSpeciesId = id
+                        currentScreen = AppScreen.PLANT_DETAILS
+                    }
+                )
+
+                AppScreen.PLANT_DETAILS -> {
+                    val id = selectedSpeciesId
+                    if (id != null) {
+                        PlantDetailsScreen(
+                            speciesId = id,
+                            onBack = { currentScreen = AppScreen.ALL_PLANTS }
+                        )
+                    } else {
+                        currentScreen = AppScreen.ALL_PLANTS
+                    }
+                }
+
+                // State: SETTINGS-SCREEN
                 AppScreen.SETTINGS -> SettingsScreen()
 
+                // State: CREATE_PLANT-SCREEN
                 AppScreen.CREATE_PLANT -> CreatePlantScreen(
+                    // ID weitergeben (null - neu angelegt; ID - bearbeitet)
                     plantIdToEdit = editingPlantId,
                     onBack = {
+                        // Zurück, woher gekommen -> Favorites oder Home)
                         currentScreen = if (editingPlantId != null) AppScreen.FAVORITES else AppScreen.HOME
                     },
+
                     onSaveSuccess = { currentScreen = AppScreen.FAVORITES }
                 )
 
+                // State: PLANT_REGISTER-SCREEN (Pflanze anlegen)
                 AppScreen.PLANT_REGISTER -> PlantRegisterScreen(
+                    // Zurück zu HOME
                     onBack = { currentScreen = AppScreen.HOME }
                 )
             }
@@ -236,7 +291,7 @@ fun PlantMenuButton(text: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp),
-        colors = ButtonDefaults.buttonColors(
+        colors = ButtonColors(
             containerColor = Color.White,
             contentColor = Color.Black,
             disabledContainerColor = Color.Gray,
