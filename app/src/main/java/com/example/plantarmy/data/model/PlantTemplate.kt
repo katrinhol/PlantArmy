@@ -26,7 +26,7 @@ data class PlantTemplate(
             customName = customName,
             location = location,
             templateId = this.id,
-            imageUrl = this.imageUrl,
+            imageUrl = this.imageUrl, // Foto aus dem Register übernehmen
             wateringIntervalDays = this.defaultWateringIntervalDays,
             fertilizingIntervalDays = this.defaultFertilizingIntervalDays
             //Description, difficulty, light requirement nicht eingebaut

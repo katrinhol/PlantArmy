@@ -41,9 +41,10 @@ fun CreatePlantScreen(
         viewModel.init(plantIdToEdit)
     }
 
+    // Wir erstellen einen ActivityLauncher für das Bild-Auswählen
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> viewModel.selectedImageUri = uri }
+        onResult = { uri -> viewModel.selectedImageUri = uri } // Uri wird übergeben
     )
 
     Scaffold(

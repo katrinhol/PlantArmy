@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
     private const val BASE_URL = "https://perenual.com/"
 
-    // Erstellt die Verbindung zur API
+
     val api: PerenualApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -23,12 +23,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 
  */
 
-
-
 object RetrofitInstance {
 
     private const val BASE_URL = "https://perenual.com/"
-
+    // Erstellt die Verbindung zur API
     val api: PerenualApiService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
