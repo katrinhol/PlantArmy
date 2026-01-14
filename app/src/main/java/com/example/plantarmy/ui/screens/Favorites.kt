@@ -40,7 +40,7 @@ fun FavoritesScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = "Meine Favoriten",
+            text = "My favorites",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -60,7 +60,7 @@ fun FavoritesScreen(
                         modifier = Modifier.size(64.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Noch keine Pflanzen angelegt", color = Color.Gray)
+                    Text("No plants added yet", color = Color.Gray)
                 }
             }
         } else {
@@ -103,7 +103,7 @@ fun FavoritePlantItem(
             if (imageModel != null) {
                 AsyncImage(
                     model = imageModel,
-                    contentDescription = "Foto von ${plant.customName}",
+                    contentDescription = "Picture of ${plant.customName}",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(70.dp)
@@ -148,13 +148,13 @@ fun FavoritePlantItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.InvertColors, // Tropfenform
-                        contentDescription = "Gießen",
+                        contentDescription = "Watering",
                         tint = Color(0xFF2196F3), // Blau
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${plant.wateringIntervalDays} Tage",
+                        text = "${plant.wateringIntervalDays} days",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
@@ -166,13 +166,13 @@ fun FavoritePlantItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.InvertColors, // Tropfenform
-                        contentDescription = "Düngen",
+                        contentDescription = "Fertilizing",
                         tint = Color(0xFF4CAF50), // Grün
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${plant.fertilizingIntervalDays} Tage",
+                        text = "${plant.fertilizingIntervalDays} days",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )

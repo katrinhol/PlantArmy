@@ -276,11 +276,11 @@ fun HomeScreenContent(
 
         Spacer(modifier = Modifier.height(60.dp))
 
-        PlantMenuButton(text = "Pflanze anlegen", onClick = onRegisterClick)
+        PlantMenuButton(text = "Add plant", onClick = onRegisterClick)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        PlantMenuButton(text = "Pflanze erstellen", onClick = onCreateClick)
+        PlantMenuButton(text = "Create plant", onClick = onCreateClick)
     }
 }
 
