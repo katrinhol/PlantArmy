@@ -253,29 +253,3 @@ fun PlantListItem(
     }
 }
 
-/*@Composable
-fun PlantListItem(plant: PlantTemplate, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = plant.name, style = MaterialTheme.typography.titleMedium)
-            Text(text = "Botanisch: ${plant.botanicName}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            Spacer(modifier = Modifier.height(4.dp))
-            Row {
-                SuggestionChip(onClick = {}, label = { Text("Gießen: Alle ${plant.defaultWateringIntervalDays} Tage") })
-                Spacer(modifier = Modifier.width(8.dp))
-                SuggestionChip(onClick = {}, label = { Text("Licht: ${plant.lightRequirement}") })
-                    label = {
-                        Text("Watering: every ${plant.defaultWateringIntervalDays} days")
-                    }
-                )
-            }
-        }
-    }
-}
