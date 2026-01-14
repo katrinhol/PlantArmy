@@ -134,7 +134,7 @@ fun PlantListItem(
                 )
 
                 Text(
-                    text = "Botanisch: ${plant.botanicName}",
+                    text = "Botanical: ${plant.botanicName}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
@@ -144,7 +144,7 @@ fun PlantListItem(
                 // ✅ Nur noch Gießen anzeigen
                 SuggestionChip(
                     onClick = {},
-                    label = { Text("Gießen: Alle ${plant.defaultWateringIntervalDays} Tage") }
+                    label = { Text("Watering: every ${plant.defaultWateringIntervalDays} days") }
                 )
             }
         }

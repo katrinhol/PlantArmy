@@ -10,13 +10,31 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.plantarmy.data.model.PlantTemplate
 import com.example.plantarmy.ui.screens.viewmodel.AllPlantsViewModel
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.OutlinedTextField
+//import androidx.compose.material3.ExposedDropdownMenuBox
+//import androidx.compose.material3.DropdownMenuItem
+//import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.ExperimentalMaterial3Api
+//import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+private val sunlightLabelMap = mapOf(
+    null to "All",
+    "full_sun" to "🌞 Full sun",
+    "sun-part_shade" to "🌤️ Sun / partial shade",
+    "part_shade" to "🌥️ Partial shade",
+    "full_shade" to "🌑 Shade"
+)
+
+private val wateringLabelMap = mapOf(
+    null to "All",
+    "frequent" to "💧 Frequent",
+    "average" to "🚿 Average",
+    "minimum" to "🌵 Low"
+)
+
+
 @Composable
 fun AllPlantsScreen(
     onPlantClick: (Int) -> Unit,
@@ -24,11 +42,11 @@ fun AllPlantsScreen(
 ) {
     LaunchedEffect(Unit) { viewModel.loadFirstPage() }
 
-    val wateringOptions = listOf(null, "frequent", "average", "minimum", "none")
+    val wateringOptions = listOf(null, "frequent", "average", "minimum")
     val sunlightOptions = listOf(null, "full_shade", "part_shade", "sun-part_shade", "full_sun")
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Pflanzenbibliothek", style = MaterialTheme.typography.headlineSmall)
+        Text("Plant Library", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(12.dp))
 
         // Filter Row
@@ -52,7 +70,7 @@ fun AllPlantsScreen(
         Button(
             onClick = { viewModel.loadFirstPage() },
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Filter anwenden") }
+        ) { Text("Apply filters") }
 
         Spacer(Modifier.height(12.dp))
 
@@ -71,12 +89,11 @@ fun AllPlantsScreen(
             enabled = !viewModel.isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (viewModel.isLoading) "Lädt..." else "Load more")
+            Text(if (viewModel.isLoading) "Loading..." else "Load more")
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FilterDropdown(
     label: String,
@@ -86,25 +103,34 @@ private fun FilterDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
-    ) {
-        OutlinedTextField(
-            value = value ?: "Alle",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(label) },
+    Box {
+        OutlinedButton(
+            onClick = { expanded = true },
             modifier = Modifier.width(170.dp)
-        )
+        ) {
+            val displayValue = when (label) {
+                "Sunlight" -> sunlightLabelMap[value] ?: (value ?: "All")
+                "Watering" -> wateringLabelMap[value] ?: (value ?: "All")
+                else -> value ?: "All"
+            }
 
-        ExposedDropdownMenu(
+            Text(text = "$label: $displayValue")
+        }
+
+        DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
             options.forEach { opt ->
                 DropdownMenuItem(
-                    text = { Text(opt ?: "Alle") },
+                    text = {
+                        val displayOpt = when (label) {
+                            "Sunlight" -> sunlightLabelMap[opt] ?: (opt ?: "All")
+                            "Watering" -> wateringLabelMap[opt] ?: (opt ?: "All")
+                            else -> opt ?: "All"
+                        }
+                        Text(displayOpt)
+                    },
                     onClick = {
                         onSelect(opt)
                         expanded = false
@@ -114,6 +140,7 @@ private fun FilterDropdown(
         }
     }
 }
+
 
 @Composable
 private fun AllPlantRow(plant: PlantTemplate, onClick: () -> Unit) {

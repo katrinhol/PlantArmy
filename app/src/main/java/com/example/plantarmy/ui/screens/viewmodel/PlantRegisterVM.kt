@@ -35,7 +35,7 @@ class PlantRegisterViewModel : ViewModel() {
             try {
                 // 1. API Aufruf (läuft im Hintergrund)
                 // Wir suchen nach Zimmerpflanzen (indoor=1), Sie können das auch auf 0 setzen für alle.
-                val response = RetrofitInstance.api.getPlants(query = query, indoor = 1)
+                val response = RetrofitInstance.api.getPlants(query = query, indoor = 0)
 
                 // 2. Umwandlung (Mapping) von API-Format zu unserem PlantTemplate
                 foundPlants = response.data.map { dto ->
