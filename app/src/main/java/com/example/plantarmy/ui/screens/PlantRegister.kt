@@ -23,6 +23,13 @@ import com.example.plantarmy.data.model.PlantTemplate
 import com.example.plantarmy.data.repository.PlantRepository
 import com.example.plantarmy.ui.viewmodel.PlantRegisterViewModel
 
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.indication
+import androidx.compose.material.ripple.rememberRipple
 
 /**
  * =====================================================
@@ -203,8 +210,12 @@ fun PlantListItem(
     plant: PlantTemplate,
     onClick: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     Card(
-        onClick = onClick,
+        onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            onClick()
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
