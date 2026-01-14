@@ -12,12 +12,21 @@ class PlantRepository(private val context: Context) {
     private val gson = Gson()
     private val fileName = "my_plants.json"
 
-    // NEUE PFLANZE SPEICHERN
+    // NEUE PFLANZE SPEICHERN (mit eindeutigem Namen)
     fun addPlant(plant: Plant) {
         val currentList = getAllPlants().toMutableList()
-        currentList.add(plant)
+
+        //eindeutigen Namen erzeugen
+        val uniqueName = generateUniqueName(plant.customName, currentList)
+
+        val plantWithUniqueName = plant.copy(
+            customName = uniqueName
+        )
+
+        currentList.add(plantWithUniqueName)
         saveList(currentList)
     }
+
 
     // PFLANZE AKTUALISIEREN
     fun updatePlant(updatedPlant: Plant) {
@@ -118,6 +127,25 @@ class PlantRepository(private val context: Context) {
         reminderPrefs.edit()
             .remove(reminderKey(type, plantId))
             .apply()
+    }
+
+    // erzeugt einen eindeutigen Namen wie "Ficus", "Ficus (1)", "Ficus (2)"
+    private fun generateUniqueName(baseName: String, plants: List<Plant>): String {
+        val existingNames = plants.map { it.customName }
+
+        if (baseName !in existingNames) {
+            return baseName
+        }
+
+        var counter = 1
+        var newName: String
+
+        do {
+            newName = "$baseName ($counter)"
+            counter++
+        } while (newName in existingNames)
+
+        return newName
     }
 
 
