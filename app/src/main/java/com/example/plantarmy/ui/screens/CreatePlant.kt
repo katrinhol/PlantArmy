@@ -28,49 +28,104 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.plantarmy.ui.viewmodel.CreatePlantViewModel
 
+
+/**
+ * =====================================================
+ * M2 – Pflanze manuell erstellen / bearbeiten
+ * =====================================================
+ *
+ * - Dieser Screen ermöglicht das manuelle Erstellen
+ *   und Bearbeiten einer Pflanze.
+ * - Der Screen wird über den "+" Button aufgerufen.
+ * - Alle relevanten Pflanzendaten können hier eingegeben werden.
+ *
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePlantScreen(
-    plantIdToEdit: String? = null, // NEU: ID wird übergeben (null = neu)
+    plantIdToEdit: String? = null, // null = neue Pflanze | ID = bestehende Pflanze bearbeiten
     onBack: () -> Unit,
     onSaveSuccess: () -> Unit,
     viewModel: CreatePlantViewModel = viewModel()
 ) {
-    // INIT: Wenn der Screen startet, laden wir die Daten (oder leeren sie)
+
+    /** -----------------------------------------------------
+     * INITIALISIERUNG
+     * -----------------------------------------------------
+     *
+     * Beim Öffnen des Screens:
+     * - neue Pflanze → Felder leeren
+     * - bestehende Pflanze → Daten laden
+     *
+     */
+
     LaunchedEffect(plantIdToEdit) {
         viewModel.init(plantIdToEdit)
     }
 
-    // Wir erstellen einen ActivityLauncher für das Bild-Auswählen
+    /** -----------------------------------------------------
+     * FOTO-AUSWAHL (Activity Result Launcher)
+     * -----------------------------------------------------
+     *
+     * Ermöglicht das Auswählen eines Pflanzenfotos
+     * aus der Galerie des Geräts.
+     *
+     */
+
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> viewModel.selectedImageUri = uri } // Uri wird übergeben
+        onResult = { uri: Uri? ->
+            viewModel.selectedImageUri = uri
+        }
     )
+
+    /** -----------------------------------------------------
+     * GRUNDLAYOUT MIT TOPBAR
+     * ----------------------------------------------------- */
 
     Scaffold(
         topBar = {
             TopAppBar(
-                // Titel ändert sich je nach Modus
-                title = { Text(if (plantIdToEdit == null) "Pflanze erstellen" else "Pflanze bearbeiten") },
+                // Titel abhängig vom Modus (Neu / Bearbeiten)
+                title = {
+                    Text(
+                        if (plantIdToEdit == null)
+                            "Create plant"
+                        else
+                            "Edit plant"
+                    )
+                },
+
+                // Zurück (Pfeil) -Navigation
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Zurück")
                     }
                 },
-                // NEU: Löschen Button nur im Bearbeiten-Modus
+
+                // Löschen-Button nur im Bearbeiten-Modus
                 actions = {
                     if (plantIdToEdit != null) {
                         IconButton(onClick = {
                             viewModel.deletePlant()
-                            onSaveSuccess() // Wir gehen zurück nach dem Löschen
+                            onSaveSuccess()
                         }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Löschen", tint = Color.Red)
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Delete plant",
+                                tint = Color.Red
+                            )
                         }
                     }
                 }
             )
         }
     ) { innerPadding ->
+
+        /* -----------------------------------------------------
+         * HAUPTINHALT
+         * ----------------------------------------------------- */
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -80,7 +135,13 @@ fun CreatePlantScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // --- 1. Foto Auswahl ---
+            /* -------------------------------------------------
+             * 1. FOTOSEKTION
+             * -------------------------------------------------
+             * Klickbarer Bereich:
+             * - zeigt ausgewähltes Bild
+             * - oder "+" Icon zum Hinzufügen
+             */
             Box(
                 modifier = Modifier
                     .size(150.dp)
@@ -88,7 +149,9 @@ fun CreatePlantScreen(
                     .background(Color.LightGray)
                     .clickable {
                         photoPickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
                         )
                     },
                 contentAlignment = Alignment.Center
@@ -96,25 +159,37 @@ fun CreatePlantScreen(
                 if (viewModel.selectedImageUri != null) {
                     AsyncImage(
                         model = viewModel.selectedImageUri,
-                        contentDescription = "Pflanzenbild",
+                        contentDescription = "Plant picture",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-                        Text(if(plantIdToEdit != null) "Ändern" else "Foto", color = Color.White)
+
+                        // M2: "+" Button zum manuellen Erstellen einer Pflanze
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Create plant manually",
+                            tint = Color.White
+                        )
+
+                        Text(
+                            if (plantIdToEdit != null) "Edit" else "Picture",
+                            color = Color.White
+                        )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- 2. Eingabefelder ---
+            /* -------------------------------------------------
+             * 2. TEXTEINGABEN (Name & Standort)
+             * ------------------------------------------------- */
             OutlinedTextField(
                 value = viewModel.name,
                 onValueChange = { viewModel.name = it },
-                label = { Text("Name der Pflanze") },
+                label = { Text("Name of plant") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -124,26 +199,38 @@ fun CreatePlantScreen(
             OutlinedTextField(
                 value = viewModel.location,
                 onValueChange = { viewModel.location = it },
-                label = { Text("Standort / Lichtbedarf") },
-                placeholder = { Text("z.B. Sonnig, Fensterbank") },
+                label = { Text("Location / Sunlight") },
+                placeholder = { Text("e.g. Sunny, window sill") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            /* -------------------------------------------------
+             * 3. INTERVALL-EINGABEN (Gießen & Düngen)
+             * ------------------------------------------------- */
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 OutlinedTextField(
                     value = viewModel.wateringInterval,
-                    onValueChange = { if (it.all { char -> char.isDigit() }) viewModel.wateringInterval = it },
-                    label = { Text("Gießen (Tage)") },
+                    onValueChange = {
+                        if (it.all { char -> char.isDigit() })
+                            viewModel.wateringInterval = it
+                    },
+                    label = { Text("Watering (days)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
                 )
 
                 OutlinedTextField(
                     value = viewModel.fertilizingInterval,
-                    onValueChange = { if (it.all { char -> char.isDigit() }) viewModel.fertilizingInterval = it },
-                    label = { Text("Düngen (Tage)") },
+                    onValueChange = {
+                        if (it.all { char -> char.isDigit() })
+                            viewModel.fertilizingInterval = it
+                    },
+                    label = { Text("Fertilize (days)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
                 )
@@ -151,16 +238,22 @@ fun CreatePlantScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- 3. Speichern Button ---
+            /* -------------------------------------------------
+             * 4. SPEICHERN
+             * -------------------------------------------------
+             * M2: Manuelle Pflanzenerstellung abschließen
+             */
             Button(
                 onClick = {
-                    viewModel.savePlant()
+                    viewModel.savePlant() // M2: manuelle Pflanzenerstellung
                     onSaveSuccess()
                 },
                 enabled = viewModel.isValid(),
-                modifier = Modifier.fillMaxWidth().height(50.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
             ) {
-                Text("Speichern")
+                Text("Save")
             }
         }
     }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -12,91 +13,191 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel // Wichtig!
-import com.example.plantarmy.data.model.PlantTemplate
-import com.example.plantarmy.ui.viewmodel.PlantRegisterViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
-import com.example.plantarmy.data.repository.PlantRepository
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.clip
 
+import com.example.plantarmy.data.model.PlantTemplate
+import com.example.plantarmy.data.repository.PlantRepository
+import com.example.plantarmy.ui.viewmodel.PlantRegisterViewModel
+
+
+/**
+ * =====================================================
+ * M1 – Pflanze aus Pflanzenregister anlegen
+ * =====================================================
+ *
+ * - Dieser Screen zeigt ein Pflanzenregister (API-basiert).
+ * - Der Nutzer kann nach Pflanzen suchen.
+ * - Durch Klick auf einen Eintrag wird eine Pflanze
+ *   aus dem Register in die eigene Sammlung übernommen.
+ * - Aufruf erfolgt über den Button "Pflanze anlegen".
+ *
+ */
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantRegisterScreen(
-    // Das ViewModel wird hier automatisch erstellt oder geholt
     viewModel: PlantRegisterViewModel = viewModel(),
-    onBack: () -> Unit // Funktion um zurück zu gehen
+    onBack: () -> Unit
 ) {
+
+    /** --------------------------------------------------------------------------------------------------------------------------
+     * STATE & DEPENDENCIES
+     * ---------------------------------------------------------------------------------------------------------------------------
+     * */
+
     var searchQuery by remember { mutableStateOf("") }
 
-    val context = LocalContext.current // *** Wichtig: gibt den Android-Context im Compose
-    val plantRepo = remember { PlantRepository(context) } // *** Wichtig: sorgt dafür, dass PlantRepository nicht bei jedem Recompose neu gebaut wird
+    // Android Context für Repository-Zugriff
+    val context = LocalContext.current
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    // Repository nur einmal erstellen (nicht bei jedem Recompose)
+    val plantRepo = remember { PlantRepository(context) }
 
-        // --- 1. Überschrift & Suchleiste ---
-        Text("Pflanzenregister durchsuchen", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(16.dp))
+    /** ------------------------------------------------------------------------------------------------------------------------
+     * GRUNDLAYOUT MIT TOPBAR
+     * -------------------------------------------------------------------------------------------------------------------------
+     * */
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Suche (z.B. Rose, Ficus)") },
-                modifier = Modifier.weight(1f),
-                singleLine = true
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Browse plant library") },
+
+                // 🔙 Zurück-Navigation
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                onClick = { viewModel.searchPlants(searchQuery) },
-                enabled = !viewModel.isLoading
-            ) {
-                Icon(Icons.Default.Search, contentDescription = "Suchen")
-            }
         }
+    ) { innerPadding ->
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+                .fillMaxSize()
+        ) {
 
-        // --- 2. Ladebalken, Fehler oder Liste ---
-        if (viewModel.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else if (viewModel.errorMessage != null) {
+            /** -----------------------------------------------------------------------------------------------------------------
+             * 1. SUCHLEISTE
+             * ------------------------------------------------------------------------------------------------------------------
+             *
+             * Nutzer gibt einen Suchbegriff ein (z. B. Rose).
+             * Klick auf Such-Button startet API-Abfrage.
+             *
+             */
+
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Warning, contentDescription = "Fehler", tint = Color.Red)
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Search (e.g. Rose, Ficus)") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = viewModel.errorMessage ?: "", color = Color.Red)
-            }
-        } else {
-            // Die Liste der Ergebnisse
-            LazyColumn {
-                items(viewModel.foundPlants) { plantTemplate ->
-                    PlantListItem(
-                        plant = plantTemplate,
-                        onClick = {
-                            val newPlant = plantTemplate.createPlant(
-                                customName = plantTemplate.name,
-                                location = "Unbekannt"
-                            )
-                            plantRepo.addPlant(newPlant)
-                            onBack()
-                        }
+
+                Button(
+                    onClick = { viewModel.searchPlants(searchQuery) },
+                    enabled = !viewModel.isLoading
+                ) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "Search plants"
                     )
                 }
             }
-        }
 
-        // Button um zurück zu gehen
-        Spacer(modifier = Modifier.weight(1f))
-        Button(onClick = onBack) {
-            Text("Zurück zum Hauptmenü")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            /** -------------------------------------------------------------------------------------------------------------
+             * 2. LADEZUSTÄNDE / FEHLER / ERGEBNISSE
+             * --------------------------------------------------------------------------------------------------------------
+             * */
+            when {
+
+                // Ladezustand während API-Abfrage
+                viewModel.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                // Fehleranzeige (z. B. Netzwerkfehler)
+                viewModel.errorMessage != null -> {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Warning,
+                            contentDescription = "Error",
+                            tint = Color.Red
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = viewModel.errorMessage ?: "",
+                            color = Color.Red
+                        )
+                    }
+                }
+
+                // Ergebnisliste aus dem Pflanzenregister
+                else -> {
+                    LazyColumn {
+
+                        items(viewModel.foundPlants) { plantTemplate ->
+
+                            PlantListItem(
+                                plant = plantTemplate,
+
+                                /** ===============================================================================================
+                                 * M1: Pflanze aus Pflanzenregister anlegen
+                                 * ================================================================================================
+                                 * - Klick auf Register-Eintrag
+                                 * - Template wird in echte Pflanze umgewandelt
+                                 * - Pflanze wird im Repository gespeichert
+                                **/
+
+                                onClick = {
+                                    val newPlant = plantTemplate.createPlant(
+                                        customName = plantTemplate.name,
+                                        location = "Unknown"
+                                    )
+
+                                    plantRepo.addPlant(newPlant)
+
+                                    // Rückkehr zur vorherigen Ansicht
+                                    onBack()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
-// Eine einzelne Zeile in der Liste
 
+/** ===========================================================================================================================
+ * EINZELNER LISTENEINTRAG IM PFLANZENREGISTER
+ * ============================================================================================================================
+ *
+ * - Stellt eine Pflanze aus der API dar
+ * - Klickbar → wird zur eigenen Pflanze hinzugefügt
+ *
+ */
 @Composable
 fun PlantListItem(
     plant: PlantTemplate,
@@ -115,7 +216,11 @@ fun PlantListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // 🌿 Pflanzenbild
+            /** -------------------------------------------------------------------------------------------------------------------
+             * Pflanzenbild
+             * --------------------------------------------------------------------------------------------------------------------
+             * */
+
             AsyncImage(
                 model = plant.imageUrl,
                 contentDescription = plant.name,
@@ -127,6 +232,11 @@ fun PlantListItem(
 
             Spacer(modifier = Modifier.width(12.dp))
 
+            /** -----------------------------------------------------------------------------------------------------------------
+             * Textinformationen
+             * ------------------------------------------------------------------------------------------------------------------
+             * */
+
             Column {
                 Text(
                     text = plant.name,
@@ -134,7 +244,7 @@ fun PlantListItem(
                 )
 
                 Text(
-                    text = "Botanical: ${plant.botanicName}",
+                    text = "Botanical name: ${plant.botanicName}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
@@ -161,9 +271,11 @@ fun PlantListItem(plant: PlantTemplate, onClick: () -> Unit) {
                 SuggestionChip(onClick = {}, label = { Text("Gießen: Alle ${plant.defaultWateringIntervalDays} Tage") })
                 Spacer(modifier = Modifier.width(8.dp))
                 SuggestionChip(onClick = {}, label = { Text("Licht: ${plant.lightRequirement}") })
+                    label = {
+                        Text("Watering: every ${plant.defaultWateringIntervalDays} days")
+                    }
+                )
             }
         }
     }
 }
-
- */

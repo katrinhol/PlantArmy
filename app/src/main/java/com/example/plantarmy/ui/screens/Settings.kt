@@ -48,7 +48,7 @@ fun SettingsScreen() {
     ) {
 
         Text(
-            text = "Einstellungen",
+            text = "Settings",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -62,9 +62,9 @@ fun SettingsScreen() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text("Benachrichtigungen", fontWeight = FontWeight.SemiBold)
+                Text("Notifications", fontWeight = FontWeight.SemiBold)
                 Text(
-                    "Erinnerungen für Gießen & Düngen",
+                    "Notifications for watering & fertilizing",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
@@ -89,7 +89,7 @@ fun SettingsScreen() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Benachrichtigungszeit", fontWeight = FontWeight.SemiBold)
+            Text("Notification time", fontWeight = FontWeight.SemiBold)
 
             Box {
                 Row(
@@ -104,14 +104,14 @@ fun SettingsScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "$selectedTime Uhr",
+                        text = "$selectedTime",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Dropdown öffnen"
+                        contentDescription = "Open dropdown"
                     )
                 }
 
@@ -121,7 +121,7 @@ fun SettingsScreen() {
                 ) {
                     timeOptions.forEach { time ->
                         DropdownMenuItem(
-                            text = { Text(text = "$time Uhr") },
+                            text = { Text(text = "$time") },
                             onClick = {
                                 selectedTime = time
                                 expanded = false
@@ -135,7 +135,7 @@ fun SettingsScreen() {
         Spacer(modifier = Modifier.height(32.dp))
 
         // --- Debug: Worker sofort auslösen ---
-        DebugTriggerReminderWorkerButton()
+        //DebugTriggerReminderWorkerButton() TODO
     }
 }
 
@@ -150,6 +150,6 @@ fun DebugTriggerReminderWorkerButton() {
         },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text("🔔 Benachrichtigung testen")
+        Text("🔔 Test notification")
     }
 }
