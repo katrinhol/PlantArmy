@@ -60,8 +60,19 @@ fun PlantDetailsScreen(
             Text(d.scientificName?.firstOrNull() ?: "", style = MaterialTheme.typography.bodyMedium)
 
             Spacer(Modifier.height(12.dp))
+            val levelRaw = d.watering
+            val level = levelRaw?.lowercase()?.trim() ?: "unknown"
 
-            Text("Watering: ${d.watering ?: "Unbekannt"}")
+            val days = when (level) {
+                "frequent" -> 3
+                "average" -> 7
+                "minimum", "low" -> 14
+                else -> null
+            }
+
+            val intervalText = days?.let { " (every $it days)" } ?: ""
+
+            Text("Watering: ${levelRaw ?: "Unknown"}$intervalText")
             Text("Cycle: ${d.cycle ?: "Unbekannt"}")
             Text("Type: ${d.type ?: "Unbekannt"}")
             Text("Family: ${d.family ?: "Unbekannt"}")

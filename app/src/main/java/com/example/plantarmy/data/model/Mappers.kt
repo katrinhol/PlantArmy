@@ -37,6 +37,7 @@ fun PerenualPlantDto.toPlantTemplate(): PlantTemplate {
         lightRequirement = light,
         description = "Automatisch importiert von Perenual API",
         difficultyLevel = "Mittel" ,
-                imageUrl = this.defaultImage?.regularUrl
+                imageUrl = this.defaultImage?.regularUrl,
+        wateringLevel = this.watering?.lowercase()
     )
 }

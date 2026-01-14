@@ -138,14 +138,6 @@ fun PlantListItem(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // ✅ Nur noch Gießen anzeigen
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text("Watering: every ${plant.defaultWateringIntervalDays} days") }
-                )
             }
         }
     }

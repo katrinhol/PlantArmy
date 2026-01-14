@@ -15,7 +15,8 @@ data class PlantTemplate(
     val lightRequirement: String,
     val description: String,
     val difficultyLevel: String,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val wateringLevel: String? = null
 ) {
     /**
      * Erstellt eine echte Pflanze basierend auf dieser Vorlage.
