@@ -6,6 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.http.Path
 
+//Retrofit Service
 interface PerenualApiService {
 
     // Funktion, um Pflanzenliste zu holen

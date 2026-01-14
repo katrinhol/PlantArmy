@@ -1,5 +1,6 @@
 package com.example.plantarmy
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -30,6 +31,7 @@ import com.example.plantarmy.ui.screens.FavoritesScreen
 import com.example.plantarmy.ui.screens.PlantArmyTheme
 import com.example.plantarmy.ui.screens.SettingsScreen
 import com.example.plantarmy.ui.screens.PlantRegisterScreen
+import com.example.plantarmy.ui.screens.SettingsScreen
 import com.example.plantarmy.workers.ReminderScheduler
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -38,19 +40,57 @@ import com.example.plantarmy.ui.screens.AllPlantsScreen
 
 import com.example.plantarmy.ui.screens.PlantDetailsScreen
 
+// Deep-link keys (aus NotificationIntent)
+private const val EXTRA_OPEN_SCREEN = "open_screen"
+private const val EXTRA_PLANT_ID = "plant_id"
+private const val SCREEN_FAVORITES = "FAVORITES"
 
 class MainActivity : ComponentActivity() {
+
+
+    // --------------------------------- BENACHRICHTIGUNGEN --------------------------------- //
+
+    // Diese States brauchen wir, damit onNewIntent() Compose updaten kann
+    private val deepLinkScreen = mutableStateOf<AppScreen?>(null)
+    private val deepLinkPlantId = mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         ReminderScheduler.start(applicationContext)
 
+        // Falls App über Notification gestartet wurde
+        handleIntent(intent)
+
         enableEdgeToEdge()
         setContent {
             PlantArmyTheme {
                 RequestNotificationPermissionIfNeeded()
-                PlantArmyScreen()
+
+                PlantArmyScreen(
+                    // wenn DeepLink da ist -> starte in Favorites, sonst Home
+                    initialScreen = deepLinkScreen.value ?: AppScreen.HOME,
+                    highlightPlantId = deepLinkPlantId.value
+                )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Wenn App schon offen ist und Notification erneut geklickt wird
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent == null) return
+
+        val openScreen = intent.getStringExtra(EXTRA_OPEN_SCREEN)
+        val plantId = intent.getStringExtra(EXTRA_PLANT_ID)
+
+        if (openScreen == SCREEN_FAVORITES) {
+            deepLinkScreen.value = AppScreen.FAVORITES
+            deepLinkPlantId.value = plantId
         }
     }
 }
@@ -65,13 +105,18 @@ enum class AppScreen {
 
 // ------------------------------------- HAUPTANZEIGE --------------------------------------- //
 @Composable
-fun PlantArmyScreen() {
-
-    // CURRENT STATE -> HOME (remember = lokale Variabel; mutableStatOf = beobachtbare Variable)
-    var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
-    // Zwischenspeicher - TODO - Warum hier in Main?
+fun PlantArmyScreen(
+    initialScreen: AppScreen = AppScreen.HOME,
+    highlightPlantId: String? = null
+) {
+    var currentScreen by remember { mutableStateOf(initialScreen) }
     var editingPlantId by remember { mutableStateOf<String?>(null) }
     var selectedSpeciesId by remember { mutableStateOf<Int?>(null) }
+
+    // Wenn ein DeepLink später reinkommt (onNewIntent), soll UI reagieren:
+    LaunchedEffect(initialScreen, highlightPlantId) {
+        currentScreen = initialScreen
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -80,21 +125,39 @@ fun PlantArmyScreen() {
         // UNTERE LEISTE
         bottomBar = {
             // Leiste nur anzeigen, wenn nicht in Register oder Create Plant Maske
-            if (currentScreen != AppScreen.PLANT_REGISTER && currentScreen != AppScreen.CREATE_PLANT && currentScreen != AppScreen.PLANT_DETAILS) {
+            if (currentScreen != AppScreen.PLANT_REGISTER && currentScreen != AppScreen.CREATE_PLANT) {
 
                 NavigationBar(containerColor = Color.White) {
                     NavigationBarItem(
-                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings", tint = if (currentScreen == AppScreen.SETTINGS) Color.Black else Color.Gray) },
+                        icon = {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = "Settings",
+                                tint = if (currentScreen == AppScreen.SETTINGS) Color.Black else Color.Gray
+                            )
+                        },
                         selected = currentScreen == AppScreen.SETTINGS,
                         onClick = { currentScreen = AppScreen.SETTINGS }
                     )
                     NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Home", tint = if (currentScreen == AppScreen.HOME) PlantGreen else Color.Gray) },
+                        icon = {
+                            Icon(
+                                Icons.Default.Home,
+                                contentDescription = "Home",
+                                tint = if (currentScreen == AppScreen.HOME) PlantGreen else Color.Gray
+                            )
+                        },
                         selected = currentScreen == AppScreen.HOME,
                         onClick = { currentScreen = AppScreen.HOME }
                     )
                     NavigationBarItem(
-                        icon = { Icon(Icons.Default.Star, contentDescription = "Favorites", tint = if (currentScreen == AppScreen.FAVORITES) Color(0xFFFFD700) else Color.Gray) },
+                        icon = {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = "Favorites",
+                                tint = if (currentScreen == AppScreen.FAVORITES) Color(0xFFFFD700) else Color.Gray
+                            )
+                        },
                         selected = currentScreen == AppScreen.FAVORITES,
                         onClick = { currentScreen = AppScreen.FAVORITES }
                     )
@@ -126,15 +189,15 @@ fun PlantArmyScreen() {
 
                     // Pflanze erstellen - Button -> CREATE_PLANT-SCREEN
                     onCreateClick = {
-                        editingPlantId = null // Wichtig: ID löschen für NEUE Pflanze
+                        editingPlantId = null
                         currentScreen = AppScreen.CREATE_PLANT
                     }
                 )
 
                 // State: FAVORITES-SCREEN
                 AppScreen.FAVORITES -> FavoritesScreen(
-
-                    // Wenn eine Pflanze geklickt wird -> ID merken und zum Bearbeiten-Screen
+                    // TODO: FavoritesScreen sollte highlightPlantId annehmen und markieren
+                    // z.B. FavoritesScreen(highlightPlantId = highlightPlantId, onPlantClick = { ... })
                     onPlantClick = { plantId ->
                         editingPlantId = plantId
                         currentScreen = AppScreen.CREATE_PLANT

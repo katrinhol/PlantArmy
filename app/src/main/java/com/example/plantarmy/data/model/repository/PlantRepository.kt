@@ -5,6 +5,7 @@ import com.example.plantarmy.data.model.Plant
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
+import java.time.LocalDate
 
 class PlantRepository(private val context: Context) {
 
@@ -62,4 +63,62 @@ class PlantRepository(private val context: Context) {
         val file = File(context.filesDir, fileName)
         file.writeText(jsonString)
     }
+
+
+    fun markPlantWatered(plantId: String) {
+        val plant = getPlantById(plantId) ?: return
+        plant.lastWateringDate = LocalDate.now()
+        updatePlant(plant)
+    }
+
+    fun markPlantFertilized(plantId: String) {
+        val plant = getPlantById(plantId) ?: return
+        plant.lastFertilizingDate = LocalDate.now()
+        updatePlant(plant)
+    }
+
+    private val reminderPrefs =
+        context.getSharedPreferences("reminder_prefs", Context.MODE_PRIVATE)
+
+    private fun reminderKey(type: String, plantId: String) =
+        "reminder_${type}_$plantId"
+
+    /**
+     * true = heute wurde für diese Pflanze + Typ (water/fert) schon erinnert
+     */
+    fun wasReminderSentToday(
+        type: String,
+        plantId: String,
+        today: LocalDate = LocalDate.now()
+    ): Boolean {
+        val storedDate = reminderPrefs.getString(reminderKey(type, plantId), null)
+        return storedDate == today.toString()
+    }
+
+    /**
+     * merkt: heute wurde erinnert
+     */
+    fun markReminderSentToday(
+        type: String,
+        plantId: String,
+        today: LocalDate = LocalDate.now()
+    ) {
+        reminderPrefs.edit()
+            .putString(reminderKey(type, plantId), today.toString())
+            .apply()
+    }
+
+    /**
+     * optional: löschen (z.B. wenn gegossen bestätigt wurde)
+     */
+    fun clearReminder(
+        type: String,
+        plantId: String
+    ) {
+        reminderPrefs.edit()
+            .remove(reminderKey(type, plantId))
+            .apply()
+    }
+
+
 }

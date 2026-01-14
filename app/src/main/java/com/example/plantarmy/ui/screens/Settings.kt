@@ -18,12 +18,17 @@ import androidx.compose.ui.unit.sp
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.plantarmy.notifications.PlantReminderWorker
+import com.example.plantarmy.notifications.NotificationSettings
 
 @Composable
 fun SettingsScreen() {
 
-    // Zustand für Switch
-    var notificationsEnabled by remember { mutableStateOf(true) }
+    // State von Noticicationeinstellung initialisieren
+    val context = LocalContext.current
+    var notificationsEnabled by remember {
+        mutableStateOf(NotificationSettings.areNotificationsEnabled(context))
+    }
+
 
     // Zustand für Dropdown
     var expanded by remember { mutableStateOf(false) }
@@ -66,7 +71,11 @@ fun SettingsScreen() {
             }
             Switch(
                 checked = notificationsEnabled,
-                onCheckedChange = { notificationsEnabled = it }
+                onCheckedChange = {
+                    notificationsEnabled = it
+                    NotificationSettings.setNotificationsEnabled(context, it)
+                }
+
             )
         }
 
@@ -141,6 +150,6 @@ fun DebugTriggerReminderWorkerButton() {
         },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text("🔔 Benachrichtigung testen 🔔")
+        Text("🔔 Benachrichtigung testen")
     }
 }
