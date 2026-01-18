@@ -72,7 +72,9 @@ class MainActivity : ComponentActivity() {
 
         ReminderScheduler.start(applicationContext)
 
-        /** C3: Random Plant Facts * */
+        /** C3-1: Random Plant Facts
+         * - ruft DailyFactScheduler Klasse auf
+         **/
         DailyFactScheduler.start(applicationContext)
 
         // Falls App über Notification gestartet wurde

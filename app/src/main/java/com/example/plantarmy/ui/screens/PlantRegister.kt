@@ -46,7 +46,7 @@ import com.example.plantarmy.data.api.RetrofitInstance
  *
  */
 
-// HELPER - FUNKTION
+// HELPER - FUNKTION : Watering
 private fun mapWateringLevelToDays(level: String?): Int {
     return when (level?.lowercase()?.trim()) {
         "frequent" -> 3
@@ -54,6 +54,35 @@ private fun mapWateringLevelToDays(level: String?): Int {
         "minimum", "low" -> 14
         "none" -> 30
         else -> 7
+    }
+}
+
+// HELPER - FUNKTION : Sunlight
+
+private fun mapSunlightToText(raw: Any?): String {
+    val values: List<String> = when (raw) {
+        is List<*> -> raw.filterIsInstance<String>().map { it.lowercase().trim() }
+        is String -> listOf(raw.lowercase().trim())
+        else -> emptyList()
+    }
+
+    if (values.isEmpty()) return ""
+
+    return when {
+        // 🌑 höchste Priorität
+        values.any { it.contains("full shade") } ->
+            "🌑 Shade"
+
+        // 🌤️ mittlere Priorität
+        values.any { it.contains("part shade") || it.contains("partial shade") } ->
+            "🌤️ Partial shade"
+
+        // 🌞 niedrigste Priorität
+        values.any { it.contains("full sun") } ->
+            "🌞 Sunny"
+
+        else ->
+            "🌿 Light requirement"
     }
 }
 
@@ -207,11 +236,18 @@ fun PlantRegisterScreen(
                                                 location = plantTemplate.lightRequirement
                                             )
 
+                                            // Licht aus Details übernehmen, falls vorhanden
+                                            val detailsLight = mapSunlightToText(details.sunlight)
+                                            if (detailsLight.isNotBlank()) {
+                                                newPlant.location = detailsLight
+                                            }
+
                                             // Details bevorzugen, wenn vorhanden –-> sonst fallback
                                             newPlant.wateringIntervalDays = detailsDays
 
                                             plantRepo.addPlant(newPlant)
                                             onPlantAdded()
+
 
                                         } catch (e: Exception) {
                                             // Wenn Details nicht klappt --> nicht immer 7, sondern fallbackDays
