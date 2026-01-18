@@ -85,4 +85,40 @@ object NotificationHelper {
         }
     }
 
+    // C3 Daily Fact Notifications
+
+    fun showDailyFactNotification(
+        context: Context,
+        id: Int,
+        title: String,
+        text: String
+    ) {
+        createChannel(context)
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            // Optional: Home öffnen
+            putExtra("open_screen", "HOME")
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            NotificationManagerCompat.from(context).notify(id, notification)
+        }
+    }
+
 }

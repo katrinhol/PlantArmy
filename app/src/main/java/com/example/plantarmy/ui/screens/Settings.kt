@@ -21,7 +21,9 @@ import com.example.plantarmy.notifications.NotificationSettings
 import com.example.plantarmy.notifications.PlantReminderWorker
 import com.example.plantarmy.workers.ReminderScheduler
 
-
+import com.example.plantarmy.data.model.settings.AppPrefs
+import androidx.compose.material.icons.filled.Eco
+import com.example.plantarmy.workers.DailyFactWorker
 @Composable
 fun SettingsScreen() {
 
@@ -30,6 +32,9 @@ fun SettingsScreen() {
 
     var notificationsEnabled by remember {
         mutableStateOf(NotificationSettings.areNotificationsEnabled(context))
+    }
+    var dailyFactsEnabled by remember {
+        mutableStateOf(AppPrefs.isDailyFactsEnabled(context))
     }
 
     /** M11-2: Uhrzeit für Benachrichtigung auwöhlen
@@ -89,7 +94,52 @@ fun SettingsScreen() {
                     NotificationSettings.setNotificationsEnabled(context, it)
 
                     ReminderScheduler.start(context)
+
+                    // Wenn Notifications aus -> Daily Facts auch aus
+                    if (!it) {
+                        dailyFactsEnabled = false
+                        AppPrefs.setDailyFactsEnabled(context, false)
+                    }
                 }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+// --- C3: Daily plant facts Switch  ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Eco,
+                    contentDescription = "Daily plant facts",
+                    tint = Color(0xFF8BC34A),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column {
+                    Text("Daily Plant Facts", fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "Receive one daily plant fact notification",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            Switch(
+                checked = dailyFactsEnabled,
+                onCheckedChange = {
+                    if (notificationsEnabled) {
+                        dailyFactsEnabled = it
+                        AppPrefs.setDailyFactsEnabled(context, it)
+                    }
+                },
+                enabled = notificationsEnabled // nur aktiv wenn Notifications an
             )
         }
 
@@ -164,9 +214,29 @@ fun SettingsScreen() {
                 onClick = {
                     WorkManager.getInstance(context)
                         .enqueue(OneTimeWorkRequestBuilder<PlantReminderWorker>().build())
+
                 }
             ) {
                 Text("🔔 Test notification")
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(
+                onClick = {
+                    WorkManager.getInstance(context)
+                        .enqueue(OneTimeWorkRequestBuilder<DailyFactWorker>().build())
+                },
+                enabled = notificationsEnabled && dailyFactsEnabled,
+                modifier = Modifier
+                    .width(173.dp)
+                    .height(39.dp)
+            ) {
+                Text("🌿 Test daily fact")
             }
         }
     }

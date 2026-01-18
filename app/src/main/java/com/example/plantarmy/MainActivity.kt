@@ -42,6 +42,7 @@ import com.example.plantarmy.ui.screens.PlantDetailsScreen
 
 import com.airbnb.lottie.compose.*
 import androidx.compose.ui.graphics.graphicsLayer
+import com.example.plantarmy.workers.DailyFactScheduler
 
 // Deep-link keys (aus NotificationIntent)
 private const val EXTRA_OPEN_SCREEN = "open_screen"
@@ -67,6 +68,9 @@ class MainActivity : ComponentActivity() {
          * */
 
         ReminderScheduler.start(applicationContext)
+
+        /** C3: Random Plant Facts * */
+        DailyFactScheduler.start(applicationContext)
 
         // Falls App über Notification gestartet wurde
         handleIntent(intent)
@@ -289,21 +293,36 @@ fun HomeScreenContent(
             LottieCompositionSpec.RawRes(R.raw.hanging_plant)
         )
 
+        // 🌿 NEU: Lottie unten als Background (edge-to-edge)
+        val bottomComposition by rememberLottieComposition(
+            LottieCompositionSpec.RawRes(R.raw.plants_main_screen)
+        )
+
+        LottieAnimation(
+            composition = bottomComposition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)               // ⬅️ größer (nach oben)
+                .align(Alignment.BottomCenter) // ⬅️ direkt an BottomBar
+                .graphicsLayer(alpha = 0.35f)
+        )
         LottieAnimation(
             composition = composition,
             iterations = LottieConstants.IterateForever,
             modifier = Modifier
-                .size(160.dp)
+                .size(180.dp)
                 .align(Alignment.TopEnd)
                 .offset(x = (-8).dp, y = 12.dp)   // fein justieren
                 .graphicsLayer(alpha = 0.35f)     // dezent im Hintergrund
         )
 
-        // Vordergrund: dein bisheriger Content
+        // Vordergrund
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(24.dp)
+                .padding(bottom = 32.dp),   // ⬅️ mehr Luft zu den Pflanzen
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
