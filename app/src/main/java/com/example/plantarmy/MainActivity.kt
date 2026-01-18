@@ -42,12 +42,15 @@ import com.example.plantarmy.ui.screens.PlantDetailsScreen
 
 import com.airbnb.lottie.compose.*
 import androidx.compose.ui.graphics.graphicsLayer
+import com.example.plantarmy.ui.screens.AddCareActionScreen
 import com.example.plantarmy.workers.DailyFactScheduler
 
 // Deep-link keys (aus NotificationIntent)
 private const val EXTRA_OPEN_SCREEN = "open_screen"
 private const val EXTRA_PLANT_ID = "plant_id"
 private const val SCREEN_FAVORITES = "FAVORITES"
+private const val SCREEN_CARE_ACTION = "CARE_ACTION"
+
 
 class MainActivity : ComponentActivity() {
 
@@ -101,11 +104,18 @@ class MainActivity : ComponentActivity() {
         val openScreen = intent.getStringExtra(EXTRA_OPEN_SCREEN)
         val plantId = intent.getStringExtra(EXTRA_PLANT_ID)
 
-        if (openScreen == SCREEN_FAVORITES) {
-            deepLinkScreen.value = AppScreen.FAVORITES
-            deepLinkPlantId.value = plantId
+        when (openScreen) {
+            SCREEN_FAVORITES -> {
+                deepLinkScreen.value = AppScreen.FAVORITES
+                deepLinkPlantId.value = plantId
+            }
+
+            SCREEN_CARE_ACTION -> {
+                deepLinkScreen.value = AppScreen.ADD_CARE_ACTION
+            }
         }
     }
+
 }
 
 val PlantGreen = Color(0xFF8BC34A)
@@ -113,7 +123,7 @@ val PastelGreenBackground = Color(0xFFF1F8E9)
 
 // --------------------------------- DEFINITION DER SCREENS --------------------------------- //
 enum class AppScreen {
-    HOME, FAVORITES, ALL_PLANTS, SETTINGS, PLANT_REGISTER, CREATE_PLANT, PLANT_DETAILS
+    HOME, FAVORITES, ALL_PLANTS, SETTINGS, PLANT_REGISTER, CREATE_PLANT, PLANT_DETAILS, ADD_CARE_ACTION
 }
 
 // ------------------------------------- HAUPTANZEIGE --------------------------------------- //
@@ -214,6 +224,10 @@ fun PlantArmyScreen(
                     }
                 )
 
+                AppScreen.ADD_CARE_ACTION -> AddCareActionScreen(
+                    onBack = { currentScreen = AppScreen.FAVORITES }
+                )
+
                 /** M6-3: Favorites bearbeiten & löschen
                  * - Bei Klick auf Pflanze wird ID übergeben
                  * - App wechselt in Bearbeitungsmodus
@@ -228,11 +242,12 @@ fun PlantArmyScreen(
 
                 // State: FAVORITES-SCREEN
                 AppScreen.FAVORITES -> FavoritesScreen(
-                    // TODO: FavoritesScreen sollte highlightPlantId annehmen und markieren
-                    // z.B. FavoritesScreen(highlightPlantId = highlightPlantId, onPlantClick = { ... })
                     onPlantClick = { plantId ->
                         editingPlantId = plantId
                         currentScreen = AppScreen.CREATE_PLANT
+                    },
+                    onAddCareActionClick = {
+                        currentScreen = AppScreen.ADD_CARE_ACTION
                     }
                 )
 
@@ -303,8 +318,8 @@ fun HomeScreenContent(
             iterations = LottieConstants.IterateForever,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(260.dp)               // ⬅️ größer (nach oben)
-                .align(Alignment.BottomCenter) // ⬅️ direkt an BottomBar
+                .height(260.dp)
+                .align(Alignment.BottomCenter)
                 .graphicsLayer(alpha = 0.35f)
         )
         LottieAnimation(
@@ -313,8 +328,8 @@ fun HomeScreenContent(
             modifier = Modifier
                 .size(180.dp)
                 .align(Alignment.TopEnd)
-                .offset(x = (-8).dp, y = 12.dp)   // fein justieren
-                .graphicsLayer(alpha = 0.35f)     // dezent im Hintergrund
+                .offset(x = (-8).dp, y = 12.dp)
+                .graphicsLayer(alpha = 0.35f)
         )
 
         // Vordergrund
@@ -322,7 +337,7 @@ fun HomeScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp)
-                .padding(bottom = 32.dp),   // ⬅️ mehr Luft zu den Pflanzen
+                .padding(bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -342,11 +357,11 @@ fun HomeScreenContent(
 
             Spacer(modifier = Modifier.height(60.dp))
 
-            PlantMenuButton(text = "Pflanze anlegen", onClick = onRegisterClick)
+            PlantMenuButton(text = "Add plant", onClick = onRegisterClick)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            PlantMenuButton(text = "Pflanze erstellen", onClick = onCreateClick)
+            PlantMenuButton(text = "Create Plant", onClick = onCreateClick)
         }
     }
 }

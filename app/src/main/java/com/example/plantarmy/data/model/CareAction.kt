@@ -8,7 +8,8 @@ import java.time.LocalDateTime
 **/
 
 sealed interface CareAction {
-   val id: String
-   val date: LocalDateTime
-   val note: String?
+    val id: String
+    val plantId: String
+    val date: LocalDateTime
+    val note: String?
 }

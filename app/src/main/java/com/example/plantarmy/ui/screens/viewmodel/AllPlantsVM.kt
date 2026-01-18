@@ -54,7 +54,7 @@ class AllPlantsViewModel : ViewModel() {
                 if (newItems.isEmpty()) canLoadMore = false else currentPage++
 
             } catch (e: Exception) {
-                errorMessage = "Fehler beim Laden: ${e.localizedMessage}"
+                errorMessage = "Error while loading: ${e.localizedMessage}"
             } finally {
                 isLoading = false
             }

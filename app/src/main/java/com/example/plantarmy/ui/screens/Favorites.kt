@@ -22,13 +22,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.plantarmy.PlantMenuButton
 import com.example.plantarmy.data.model.Plant
 import com.example.plantarmy.ui.viewmodel.FavoritesViewModel
 
 @Composable
 fun FavoritesScreen(
     viewModel: FavoritesViewModel = viewModel(),
-    onPlantClick: (String) -> Unit
+    onPlantClick: (String) -> Unit,
+    onAddCareActionClick: () -> Unit
 ) {
 
     /** M9-5: lokale Speicherung in JSON
@@ -48,6 +50,15 @@ fun FavoritesScreen(
             text = "My favorites",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(24.dp)) // 👈 Abstand
+
+        PlantMenuButton(
+            text = "Add care action",
+            onClick = onAddCareActionClick
         )
 
         Spacer(modifier = Modifier.height(16.dp))

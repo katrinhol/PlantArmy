@@ -57,4 +57,10 @@ data class Plant(
         return !LocalDate.now().isBefore(nextDate)
     }
 
+    fun isFertilizingDue(): Boolean {
+        val nextDate = calculateNextFertilizingDate()
+        return !LocalDate.now().isBefore(nextDate)
+    }
+
+
 }

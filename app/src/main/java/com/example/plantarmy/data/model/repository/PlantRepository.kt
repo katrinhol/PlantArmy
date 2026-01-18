@@ -6,15 +6,21 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.time.LocalDate
+import com.example.plantarmy.data.model.CareAction
+import com.google.gson.GsonBuilder
+
 
 class PlantRepository(private val context: Context) {
 
-    private val gson = Gson()
+
+    private val gson = GsonBuilder().create()
 
     /** M9-1: lokale Speicherung in JSON
      * - Lokale Datei im App-internen Speicher
      * */
     private val fileName = "my_plants.json"
+    private val careActionsFileName = "care_actions.json"
+
 
     // NEUE PFLANZE SPEICHERN (mit eindeutigem Namen)
     fun addPlant(plant: Plant) {
@@ -169,6 +175,40 @@ class PlantRepository(private val context: Context) {
 
         return newName
     }
+
+    fun saveCareAction(action: CareAction) {
+        val actions = getAllCareActions().toMutableList()
+        actions.add(action)
+        saveCareActions(actions)
+    }
+
+    fun getAllCareActions(): List<CareAction> {
+        val file = File(context.filesDir, careActionsFileName)
+        if (!file.exists()) return emptyList()
+
+        return try {
+            val jsonString = file.readText()
+            val type = object : TypeToken<List<CareAction>>() {}.type
+            gson.fromJson(jsonString, type) ?: emptyList()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    private fun saveCareActions(actions: List<CareAction>) {
+        val jsonString = gson.toJson(actions)
+        val file = File(context.filesDir, careActionsFileName)
+        file.writeText(jsonString)
+    }
+
+    fun getCareActionsForPlant(plantId: String): List<CareAction> {
+        return getAllCareActions().filter { it.plantId == plantId }
+    }
+
+
+
+
 
 
 }

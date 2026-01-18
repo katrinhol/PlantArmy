@@ -54,7 +54,7 @@ object NotificationHelper {
         //Bei Klick -> Main Activity
         val intent = Intent(context, MainActivity::class.java).apply {
             //Deep-Linking zu Main
-            putExtra("open_screen", "FAVORITES")
+            putExtra("open_screen", "CARE_ACTION")
             putExtra("plant_id", plantId)
             //Single-Top -> nutzt vorhandene Activity, kein mehrfaches Öffnen
             //Clear-Top -> räumt alte screens auf
