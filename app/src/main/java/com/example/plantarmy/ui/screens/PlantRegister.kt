@@ -30,6 +30,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.indication
 import androidx.compose.material.ripple.rememberRipple
+import kotlinx.coroutines.launch
+import com.example.plantarmy.data.api.RetrofitInstance
 
 /**
  * =====================================================
@@ -43,6 +45,17 @@ import androidx.compose.material.ripple.rememberRipple
  * - Aufruf erfolgt über den Button "Pflanze anlegen".
  *
  */
+
+// HELPER - FUNKTION
+private fun mapWateringLevelToDays(level: String?): Int {
+    return when (level?.lowercase()?.trim()) {
+        "frequent" -> 3
+        "average" -> 7
+        "minimum", "low" -> 14
+        "none" -> 30
+        else -> 7
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +77,8 @@ fun PlantRegisterScreen(
 
     // Repository nur einmal erstellen (nicht bei jedem Recompose)
     val plantRepo = remember { PlantRepository(context) }
+
+    val scope = rememberCoroutineScope()
 
     /** ------------------------------------------------------------------------------------------------------------------------
      * GRUNDLAYOUT MIT TOPBAR
@@ -177,15 +192,40 @@ fun PlantRegisterScreen(
                                  * - Pflanze wird im Repository gespeichert
                                 **/
 
-                                    onClick = {
-                                    val newPlant = plantTemplate.createPlant(
-                                        customName = plantTemplate.name,
-                                        location = plantTemplate.lightRequirement
-                                    )
-                                    plantRepo.addPlant(newPlant)
+                                onClick = {
+                                    scope.launch {
+                                        // Fallback aus der LISTE
+                                        val fallbackDays = mapWateringLevelToDays(plantTemplate.wateringLevel)
 
-                                    //Nach Auswahl direkt zu Favorites
-                                    onPlantAdded()
+                                        try {
+                                            val details = RetrofitInstance.api.getPlantDetails(plantTemplate.id)
+
+                                            val detailsDays = mapWateringLevelToDays(details.watering)
+
+                                            val newPlant = plantTemplate.createPlant(
+                                                customName = plantTemplate.name,
+                                                location = plantTemplate.lightRequirement
+                                            )
+
+                                            // Details bevorzugen, wenn vorhanden –-> sonst fallback
+                                            newPlant.wateringIntervalDays = detailsDays
+
+                                            plantRepo.addPlant(newPlant)
+                                            onPlantAdded()
+
+                                        } catch (e: Exception) {
+                                            // Wenn Details nicht klappt --> nicht immer 7, sondern fallbackDays
+                                            val newPlant = plantTemplate.createPlant(
+                                                customName = plantTemplate.name,
+                                                location = plantTemplate.lightRequirement
+                                            )
+
+                                            newPlant.wateringIntervalDays = fallbackDays
+
+                                            plantRepo.addPlant(newPlant)
+                                            onPlantAdded()
+                                        }
+                                    }
                                 }
 
                             )
