@@ -34,7 +34,6 @@ class PlantRegisterViewModel : ViewModel() {
 
             try {
                 // 1. API Aufruf (läuft im Hintergrund)
-                // Wir suchen nach Zimmerpflanzen (indoor=1), Sie können das auch auf 0 setzen für alle.
                 val response = RetrofitInstance.api.getPlants(query = query, indoor = 0)
 
                 // 2. Umwandlung (Mapping) von API-Format zu unserem PlantTemplate
@@ -44,7 +43,7 @@ class PlantRegisterViewModel : ViewModel() {
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                errorMessage = "Fehler beim Laden: ${e.localizedMessage}"
+                errorMessage = "Error while loading: ${e.localizedMessage}"
             } finally {
                 isLoading = false
             }

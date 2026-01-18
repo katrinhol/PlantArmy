@@ -30,6 +30,11 @@ fun FavoritesScreen(
     viewModel: FavoritesViewModel = viewModel(),
     onPlantClick: (String) -> Unit
 ) {
+
+    /** M9-5: lokale Speicherung in JSON
+     * - Aufrufen bei Starten App & Öffnen Screen
+     * */
+
     LaunchedEffect(Unit) {
         viewModel.loadPlants()
     }
@@ -64,10 +69,26 @@ fun FavoritesScreen(
                 }
             }
         } else {
+
+            /** M8-1: Favorites in strukturierter Liste
+             * - Pflanzen sehen und auswählen
+             * */
+
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
+
+                /** M6-2: Favorites bearbeiten & löschen
+                 * - Pflanzen sehen und auswählen
+                 * - Next: MainActivity - Bearbeitungsmodus
+                 * */
+
+                /** M7-1: Favorites bearbeiten & löschen
+                 * - Pflanzen sehen und auswählen
+                 * - Next: Next: MainActivity - Bearbeitungsmodus
+                 * */
+
                 items(viewModel.plants) { plant ->
                     FavoritePlantItem(
                         plant = plant,
@@ -97,6 +118,11 @@ fun FavoritePlantItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
+            /** M8-2: Favorites in strukturierter Liste
+             * - Pflanzenbild
+             * */
+
             // 1. Das Bild (API-URL oder lokales Foto)
             val imageModel: Any? = plant.photos.firstOrNull()?.uri ?: plant.imageUrl
 
@@ -126,11 +152,21 @@ fun FavoritePlantItem(
 
             // 2. Text Informationen (Links)
             Column(modifier = Modifier.weight(1f)) {
+
+                /** M8-3: Favorites in strukturierter Liste
+                 * - Pflanzenname
+                 * */
+
                 Text(
                     text = plant.customName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
+
+                /** M8-3: Favorites in strukturierter Liste
+                 * - Pflanzen-Location
+                 * */
+
                 if (plant.location.isNotBlank()) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -153,6 +189,11 @@ fun FavoritePlantItem(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
+
+                    /** M8-4: Favorites in strukturierter Liste
+                     * - Pflanzen Watering Intervall
+                     * */
+
                     Text(
                         text = "${plant.wateringIntervalDays} days",
                         fontSize = 12.sp,
@@ -171,6 +212,11 @@ fun FavoritePlantItem(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
+
+                    /** M8-5: Favorites in strukturierter Liste
+                     * - Pflanzen Fertilizing Intervall
+                     * */
+
                     Text(
                         text = "${plant.fertilizingIntervalDays} days",
                         fontSize = 12.sp,

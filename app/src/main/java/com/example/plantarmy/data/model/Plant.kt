@@ -15,6 +15,10 @@ data class Plant(
     var imageUrl: String? = null, //
 
     // PFLEGE INTERVALL (in Tagen)
+
+    /** M4-3: Gießintervall für Pflanzen aus Register
+     * - Speicherung Integer als waeringInterval pro Pflanze
+     * */
     var wateringIntervalDays: Int,
     var fertilizingIntervalDays: Int,
 
@@ -40,6 +44,11 @@ data class Plant(
         val lastDate = lastFertilizingDate ?: return LocalDate.now()
         return lastDate.plusDays(fertilizingIntervalDays.toLong())
     }
+
+    /** M5-1: Benachrichtigung, sobald Intervall abläuft
+     * - Check, ob Gießintervall abgelaufen ist
+     * - Next: PlantReminderWorker
+     * */
 
     // LOGIK: GIESSEN HEUTE (ODER FRÜHER) FÄLLIG
     fun isWateringDue(): Boolean {

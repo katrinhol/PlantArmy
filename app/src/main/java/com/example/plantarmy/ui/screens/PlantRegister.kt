@@ -48,7 +48,8 @@ import androidx.compose.material.ripple.rememberRipple
 @Composable
 fun PlantRegisterScreen(
     viewModel: PlantRegisterViewModel = viewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onPlantAdded: () -> Unit
 ) {
 
     /** --------------------------------------------------------------------------------------------------------------------------
@@ -74,7 +75,7 @@ fun PlantRegisterScreen(
             TopAppBar(
                 title = { Text("Browse plant library") },
 
-                // 🔙 Zurück-Navigation
+                // Zurück-Navigation
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -176,17 +177,17 @@ fun PlantRegisterScreen(
                                  * - Pflanze wird im Repository gespeichert
                                 **/
 
-                                onClick = {
+                                    onClick = {
                                     val newPlant = plantTemplate.createPlant(
                                         customName = plantTemplate.name,
-                                        location = "Unknown"
+                                        location = plantTemplate.lightRequirement
                                     )
-
                                     plantRepo.addPlant(newPlant)
 
-                                    // Rückkehr zur vorherigen Ansicht
-                                    onBack()
+                                    //Nach Auswahl direkt zu Favorites
+                                    onPlantAdded()
                                 }
+
                             )
                         }
                     }
@@ -205,6 +206,7 @@ fun PlantRegisterScreen(
  * - Klickbar → wird zur eigenen Pflanze hinzugefügt
  *
  */
+
 @Composable
 fun PlantListItem(
     plant: PlantTemplate,

@@ -20,47 +20,92 @@ fun PlantDetailsScreen(
     onBack: () -> Unit,
     viewModel: PlantDetailsViewModel = viewModel()
 ) {
-    LaunchedEffect(speciesId) { viewModel.load(speciesId) }
+
+    /** -----------------------------------------------------
+     * M3: Laden der Detailinformationen einer Pflanze aus dem Register
+     * ----------------------------------------------------- */
+
+    LaunchedEffect(speciesId) {
+        viewModel.load(speciesId)
+    }
 
     Scaffold(
+
+        /** -----------------------------------------------------
+         * TopBar mit Zurück-Navigation
+         * (Teil der Register-Navigation)
+         * ----------------------------------------------------- */
+
         topBar = {
             TopAppBar(
                 title = { Text("Details") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Zurück")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
         }
+
     ) { inner ->
+
         Column(
-            Modifier.padding(inner).padding(16.dp).verticalScroll(rememberScrollState())
+            Modifier
+                .padding(inner)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
+
+            /** -------------------------------
+            * Lade- und Fehlerzustände
+            ------------------------------------ */
+
             if (viewModel.isLoading) {
                 CircularProgressIndicator()
                 return@Column
             }
+
             if (viewModel.error != null) {
-                Text(viewModel.error!!, color = MaterialTheme.colorScheme.error)
+                Text(
+                    viewModel.error!!,
+                    color = MaterialTheme.colorScheme.error
+                )
                 return@Column
             }
 
+            /** -------------------------------
+             Detaildaten der Pflanze
+            ----------------------------------- */
             val d = viewModel.detail ?: return@Column
 
+            // Pflanzenbild aus dem Register (API)
             AsyncImage(
                 model = d.defaultImage?.regularUrl,
                 contentDescription = d.commonName,
-                modifier = Modifier.fillMaxWidth().height(220.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
             )
 
             Spacer(Modifier.height(12.dp))
 
-            Text(d.commonName ?: "Unbekannt", style = MaterialTheme.typography.headlineSmall)
-            Text(d.scientificName?.firstOrNull() ?: "", style = MaterialTheme.typography.bodyMedium)
+            // Name & botanischer Name
+            Text(
+                d.commonName ?: "Unknown",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Text(
+                d.scientificName?.firstOrNull() ?: "",
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             Spacer(Modifier.height(12.dp))
 
+            /** -------------------------------
+             M3: Grundlegende Pflegeinfos
+            ------------------------------------ */
+
+            // Wasserbedarf (inkl. Umrechnung in Tage)
             val levelRaw = d.watering
             val level = levelRaw?.lowercase()?.trim() ?: "unknown"
 
@@ -71,20 +116,25 @@ fun PlantDetailsScreen(
                 else -> null
             }
 
+            val intervalText = days?.let { " (every $it days)" } ?: ""
+
+            // Lichtverhältnisse aus API (Liste → String)
             val sunlightText = when (val s = d.sunlight) {
                 is List<*> -> s.filterNotNull().joinToString(", ").ifBlank { "Unknown" }
                 is String -> s.ifBlank { "Unknown" }
                 else -> "Unknown"
             }
 
-            val intervalText = days?.let { " (every $it days)" } ?: ""
+            /** -------------------------------
+             Anzeige der Register-Infos
+            ------------------------------------ */
 
             Text("Watering: ${levelRaw ?: "Unknown"}$intervalText")
             Text("Sunlight: $sunlightText")
-            Text("Cycle: ${d.cycle ?: "Unbekannt"}")
-            Text("Type: ${d.type ?: "Unbekannt"}")
-            Text("Family: ${d.family ?: "Unbekannt"}")
-            Text("Origin: ${d.origin?.joinToString(", ") ?: "Unbekannt"}")
+            Text("Cycle: ${d.cycle ?: "Unknown"}")
+            Text("Type: ${d.type ?: "Unknown"}")
+            Text("Family: ${d.family ?: "Unknown"}")
+            Text("Origin: ${d.origin?.joinToString(", ") ?: "Unknown"}")
         }
     }
 }

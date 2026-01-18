@@ -25,7 +25,7 @@ class PlantDetailsViewModel : ViewModel() {
             try {
                 detail = RetrofitInstance.api.getPlantDetails(id)
             } catch (e: Exception) {
-                error = "Fehler beim Laden: ${e.localizedMessage}"
+                error = "Error while loading: ${e.localizedMessage}"
             } finally {
                 isLoading = false
             }

@@ -6,6 +6,10 @@ import com.example.plantarmy.data.api.PerenualPlantDto
 // sich selbst in ein "PlantTemplate" zu verwandeln.
 fun PerenualPlantDto.toPlantTemplate(): PlantTemplate {
 
+    /** M4-2: Gießintervall für Pflanzen aus Register
+     * - Umwandlung der Beschreibung aus API in Integer
+     * */
+
     // Einfache Logik für Gießintervalle
     val wInterval = when (this.watering?.lowercase()) {
         "frequent" -> 3
@@ -23,7 +27,7 @@ fun PerenualPlantDto.toPlantTemplate(): PlantTemplate {
         // Fall 2: Es ist bereits ein Text (z.B. "Full sun")
         is String -> rawSunlight
         // Fall 3: Es ist null oder etwas anderes
-        else -> "Unbekannt"
+        else -> "Unknown"
     }
 
     // Ein sicheres PlantTemplate zurückgeben

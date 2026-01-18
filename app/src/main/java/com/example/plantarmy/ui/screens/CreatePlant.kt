@@ -60,6 +60,14 @@ fun CreatePlantScreen(
      *
      */
 
+    /** M6-4: Favorites bearbeiten & löschen
+     * - Pflanze laden + Felder editierbar machen
+     * */
+
+    /** M7-2: Favorites bearbeiten & löschen
+     * - Pflanze laden + Felder editierbar machen
+     * */
+
     LaunchedEffect(plantIdToEdit) {
         viewModel.init(plantIdToEdit)
     }
@@ -87,6 +95,7 @@ fun CreatePlantScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+
                 // Titel abhängig vom Modus (Neu / Bearbeiten)
                 title = {
                     Text(
@@ -103,6 +112,10 @@ fun CreatePlantScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Zurück")
                     }
                 },
+
+                /** M7-3: Favorites bearbeiten & löschen
+                 * - Button zum löschen der Pflanze
+                 * */
 
                 // Löschen-Button nur im Bearbeiten-Modus
                 actions = {
@@ -123,9 +136,10 @@ fun CreatePlantScreen(
         }
     ) { innerPadding ->
 
-        /* -----------------------------------------------------
+        /** -----------------------------------------------------
          * HAUPTINHALT
          * ----------------------------------------------------- */
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -135,13 +149,15 @@ fun CreatePlantScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            /* -------------------------------------------------
+            /** -------------------------------------------------
              * 1. FOTOSEKTION
              * -------------------------------------------------
              * Klickbarer Bereich:
              * - zeigt ausgewähltes Bild
              * - oder "+" Icon zum Hinzufügen
              */
+
+
             Box(
                 modifier = Modifier
                     .size(150.dp)
@@ -183,7 +199,7 @@ fun CreatePlantScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            /* -------------------------------------------------
+            /** -------------------------------------------------
              * 2. TEXTEINGABEN (Name & Standort)
              * ------------------------------------------------- */
             OutlinedTextField(
@@ -206,9 +222,10 @@ fun CreatePlantScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            /* -------------------------------------------------
+            /** -------------------------------------------------
              * 3. INTERVALL-EINGABEN (Gießen & Düngen)
              * ------------------------------------------------- */
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -238,11 +255,12 @@ fun CreatePlantScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            /* -------------------------------------------------
+            /** -------------------------------------------------
              * 4. SPEICHERN
              * -------------------------------------------------
              * M2: Manuelle Pflanzenerstellung abschließen
              */
+
             Button(
                 onClick = {
                     viewModel.savePlant() // M2: manuelle Pflanzenerstellung

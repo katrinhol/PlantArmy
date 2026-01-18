@@ -57,6 +57,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+        /** M5-4: Benachrichtigung, sobald Intervall abläuft
+         * - Systemweite Ausführung - Start
+         * - ruft ReminderScheduler Klasse auf
+         * */
+
         ReminderScheduler.start(applicationContext)
 
         // Falls App über Notification gestartet wurde
@@ -127,6 +133,7 @@ fun PlantArmyScreen(
             // Leiste nur anzeigen, wenn nicht in Register oder Create Plant Maske
             if (currentScreen != AppScreen.PLANT_REGISTER && currentScreen != AppScreen.CREATE_PLANT) {
 
+
                 NavigationBar(containerColor = Color.White) {
                     NavigationBarItem(
                         icon = {
@@ -150,6 +157,12 @@ fun PlantArmyScreen(
                         selected = currentScreen == AppScreen.HOME,
                         onClick = { currentScreen = AppScreen.HOME }
                     )
+
+                    /** M6-1: Favorites bearbeiten & löschen
+                     * - Button, der zu Überischt Favorites führt
+                     * - Next: FavoritesScreen
+                     * */
+
                     NavigationBarItem(
                         icon = {
                             Icon(
@@ -193,6 +206,18 @@ fun PlantArmyScreen(
                         currentScreen = AppScreen.CREATE_PLANT
                     }
                 )
+
+                /** M6-3: Favorites bearbeiten & löschen
+                 * - Bei Klick auf Pflanze wird ID übergeben
+                 * - App wechselt in Bearbeitungsmodus
+                 * - Next: CreatePlant
+                 * */
+
+                /** M7-1: Favorites bearbeiten & löschen
+                 * - Bei Klick auf Pflanze wird ID übergeben
+                 * - App wechselt in Bearbeitungsmodus
+                 * - Next: CreatePlant
+                 * */
 
                 // State: FAVORITES-SCREEN
                 AppScreen.FAVORITES -> FavoritesScreen(
@@ -240,8 +265,8 @@ fun PlantArmyScreen(
 
                 // State: PLANT_REGISTER-SCREEN (Pflanze anlegen)
                 AppScreen.PLANT_REGISTER -> PlantRegisterScreen(
-                    // Zurück zu HOME
-                    onBack = { currentScreen = AppScreen.HOME }
+                    onBack = { currentScreen = AppScreen.HOME },
+                    onPlantAdded = { currentScreen = AppScreen.FAVORITES }
                 )
             }
         }

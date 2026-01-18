@@ -17,30 +17,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.plantarmy.notifications.PlantReminderWorker
 import com.example.plantarmy.notifications.NotificationSettings
+import com.example.plantarmy.notifications.PlantReminderWorker
+import com.example.plantarmy.workers.ReminderScheduler
+
 
 @Composable
 fun SettingsScreen() {
 
-    // State von Noticicationeinstellung initialisieren
+
     val context = LocalContext.current
+
     var notificationsEnabled by remember {
         mutableStateOf(NotificationSettings.areNotificationsEnabled(context))
     }
 
+    /** M11-2: Uhrzeit für Benachrichtigung auwöhlen
+     * - Beobachtung der ausgwählten Uhrzeit
+     * */
 
-    // Zustand für Dropdown
-    var expanded by remember { mutableStateOf(false) }
-    var selectedTime by remember { mutableStateOf("09:00") }
-
-    // Uhrzeit-Liste
-    val timeOptions = remember {
-        (0..23 step 3).map { hour ->
-            "%02d:00".format(hour)
-        }
+    var selectedTime by remember {
+        mutableStateOf(NotificationSettings.getNotificationTime(context))
     }
 
+    var expanded by remember { mutableStateOf(false) }
+
+    // Uhrzeiten für Dropdown (alle 3 Stunden)
+    val timeOptions = remember {
+        (0..23 step 3).map { hour -> "%02d:00".format(hour) }
+    }
+
+    /** -------------------------------------------------
+     * UI
+     * ------------------------------------------------- */
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,7 +64,6 @@ fun SettingsScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- Benachrichtigungen Switch ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -64,18 +72,24 @@ fun SettingsScreen() {
             Column {
                 Text("Notifications", fontWeight = FontWeight.SemiBold)
                 Text(
-                    "Notifications for watering & fertilizing",
+                    "Reminders for watering and fertilizing",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
             }
+
+            /** M10-1: Aktivieren & Deaktivieren von Benachrichtigungen
+             * - Toggle
+             * */
+
             Switch(
                 checked = notificationsEnabled,
                 onCheckedChange = {
                     notificationsEnabled = it
                     NotificationSettings.setNotificationsEnabled(context, it)
-                }
 
+                    ReminderScheduler.start(context)
+                }
             )
         }
 
@@ -83,12 +97,12 @@ fun SettingsScreen() {
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Auswahl der Uhrzeit (Dropdown) ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+
             Text("Notification time", fontWeight = FontWeight.SemiBold)
 
             Box {
@@ -104,7 +118,7 @@ fun SettingsScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "$selectedTime",
+                        text = selectedTime,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -115,41 +129,45 @@ fun SettingsScreen() {
                     )
                 }
 
+                /** M11-1: Uhrzeit für Benachrichtigung auwöhlen
+                 * - Dropdown für die Auswahl der Uhrzeit
+                 * - Next: FavoritesScreen
+                 * */
+
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
                     timeOptions.forEach { time ->
                         DropdownMenuItem(
-                            text = { Text(text = "$time") },
+                            text = { Text(time) },
                             onClick = {
                                 selectedTime = time
+                                NotificationSettings.setNotificationTime(context, time)
+                                ReminderScheduler.start(context)
                                 expanded = false
                             }
                         )
                     }
                 }
+
             }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- Debug: Worker sofort auslösen ---
-        //DebugTriggerReminderWorkerButton() TODO
-    }
-}
-
-@Composable
-fun DebugTriggerReminderWorkerButton() {
-    val context = LocalContext.current
-
-    Button(
-        onClick = {
-            val request = OneTimeWorkRequestBuilder<PlantReminderWorker>().build()
-            WorkManager.getInstance(context).enqueue(request)
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("🔔 Test notification")
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(
+                onClick = {
+                    WorkManager.getInstance(context)
+                        .enqueue(OneTimeWorkRequestBuilder<PlantReminderWorker>().build())
+                }
+            ) {
+                Text("🔔 Test notification")
+            }
+        }
     }
 }

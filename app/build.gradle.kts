@@ -87,6 +87,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
 
+    implementation("com.airbnb.android:lottie:6.3.0")
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

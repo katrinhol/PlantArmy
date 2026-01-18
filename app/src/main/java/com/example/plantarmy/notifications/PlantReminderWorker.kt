@@ -5,9 +5,12 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.plantarmy.data.repository.PlantRepository
 import java.time.LocalDate
-import com.example.plantarmy.notifications.NotificationSettings
+import java.time.LocalTime
 
-
+/**
+ * M5-2: Benachrichtigung, sobald Intervall abläuft
+ * - regelmäßige automatische Hintergrundprüfung
+ */
 class PlantReminderWorker(
     context: Context,
     params: WorkerParameters
@@ -15,13 +18,45 @@ class PlantReminderWorker(
 
     override suspend fun doWork(): Result {
 
+        /**
+         * -------------------------------------------------
+         * M10-4: Aktivieren & Deaktivieren von Benachrichtigungen
+         * -------------------------------------------------
+         * - Prüft, ob Benachrichtigungen global aktiviert sind
+         * - Falls deaktiviert → Worker beendet sich ohne Aktion
+         */
         if (!NotificationSettings.areNotificationsEnabled(applicationContext)) {
             return Result.success()
         }
 
+        /** M11-5: Uhrzeit für Benachrichtigung auswählen
+         * - Gelesene Uhrzeit aus den Einstellungen (z. B. "09:00")
+         * - Vergleich mit aktueller Uhrzeit
+         * - Benachrichtigungen werden NUR ausgelöst,
+         *   wenn die gewählte Uhrzeit erreicht oder überschritten ist
+         * */
+
+        val notificationTime = NotificationSettings.getNotificationTime(applicationContext)
+        val (hour, minute) = notificationTime.split(":").map { it.toInt() }
+
+        val selectedTimeInMinutes = hour * 60 + minute
+
+        val now = LocalTime.now()
+        val currentTimeInMinutes = now.hour * 60 + now.minute
+
+        // Noch zu früh → heute noch keine Benachrichtigungen
+        if (currentTimeInMinutes < selectedTimeInMinutes) {
+            return Result.success()
+        }
+
+        /**
+         * -------------------------------------------------
+         * Laden der Pflanzen & aktuelles Datum
+         * -------------------------------------------------
+         */
+
         val repo = PlantRepository(applicationContext)
         val allPlants = repo.getAllPlants()
-
         val today = LocalDate.now()
 
         allPlants
@@ -29,9 +64,17 @@ class PlantReminderWorker(
             .forEach { plant ->
 
                 /**
+                 * =================================================
                  * GIESSEN
-                 **/
+                 * =================================================
+                 */
 
+                /**
+                 * M5-3: Benachrichtigung, sobald Intervall abläuft
+                 * - Prüft, ob Gießintervall abgelaufen ist
+                 * - Prüft, ob heute bereits erinnert wurde
+                 * - Löst Benachrichtigung aus
+                 */
                 if (
                     plant.isWateringDue() &&
                     !repo.wasReminderSentToday(
@@ -43,12 +86,12 @@ class PlantReminderWorker(
                     NotificationHelper.showNotification(
                         context = applicationContext,
                         id = ("water_${plant.id}").hashCode(),
-                        title = "Zeit zum Gießen: ${plant.customName}",
-                        text = "Das Gießintervall ist abgelaufen.",
+                        title = "Time for watering: ${plant.customName}",
+                        text = "The watering interval has expired.",
                         plantId = plant.id
                     )
 
-                    // merken: heute schon erinnert
+                    // Merken: heute bereits erinnert
                     repo.markReminderSentToday(
                         type = "water",
                         plantId = plant.id,
@@ -57,8 +100,10 @@ class PlantReminderWorker(
                 }
 
                 /**
+                 * =================================================
                  * DÜNGEN
-                 **/
+                 * =================================================
+                 */
 
                 val fertilizingDue =
                     !today.isBefore(plant.calculateNextFertilizingDate())
@@ -74,12 +119,12 @@ class PlantReminderWorker(
                     NotificationHelper.showNotification(
                         context = applicationContext,
                         id = ("fert_${plant.id}").hashCode(),
-                        title = "Zeit zum Düngen: ${plant.customName}",
-                        text = "Das Düngeintervall ist abgelaufen.",
+                        title = "Time for fertilizing: ${plant.customName}",
+                        text = "The fertilizing interval has expired.",
                         plantId = plant.id
                     )
 
-                    // merken: heute schon erinnert
+                    // Merken: heute bereits erinnert
                     repo.markReminderSentToday(
                         type = "fert",
                         plantId = plant.id,

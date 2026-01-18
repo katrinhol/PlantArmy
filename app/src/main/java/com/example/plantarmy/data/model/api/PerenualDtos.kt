@@ -12,6 +12,12 @@ data class PerenualResponse(
     val data: List<PerenualPlantDto>
 )
 
+/** M4-1: Gießintervall für Pflanzen aus Register
+ * - hier werden die Intervalle aus der API übernommen
+ * - diese werden in Mappers umgerechnet
+ * - wenn notwendig in PlanTemplate default gesetzt
+ * */
+
 // Einzelne Pflanze, wie sie von der API kommt:
 data class PerenualPlantDto(
     val id: Int, // eindeutige ID der Pflanze aus API

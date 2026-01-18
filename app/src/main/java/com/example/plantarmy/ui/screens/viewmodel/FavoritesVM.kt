@@ -16,6 +16,11 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
     var plants by mutableStateOf<List<Plant>>(emptyList())
         private set
 
+    /** M9-4: lokale Speicherung in JSON
+     * - Automatische Nutzung nach App-Start
+     * - Aufgerufen in Favorites
+     * */
+
     // Lädt die Daten neu (z.B. wenn man auf den Screen zurückkommt)
     fun loadPlants() {
         plants = repository.getAllPlants()

@@ -10,6 +10,10 @@ import java.time.LocalDate
 class PlantRepository(private val context: Context) {
 
     private val gson = Gson()
+
+    /** M9-1: lokale Speicherung in JSON
+     * - Lokale Datei im App-internen Speicher
+     * */
     private val fileName = "my_plants.json"
 
     // NEUE PFLANZE SPEICHERN (mit eindeutigem Namen)
@@ -20,7 +24,12 @@ class PlantRepository(private val context: Context) {
         val uniqueName = generateUniqueName(plant.customName, currentList)
 
         val plantWithUniqueName = plant.copy(
-            customName = uniqueName
+            customName = uniqueName,
+
+            location = plant.location.ifBlank { "Unknown" },
+
+            wateringIntervalDays = plant.wateringIntervalDays.takeIf { it > 0 } ?: 7,
+            fertilizingIntervalDays = plant.fertilizingIntervalDays.takeIf { it > 0 } ?: 14
         )
 
         currentList.add(plantWithUniqueName)
@@ -39,6 +48,11 @@ class PlantRepository(private val context: Context) {
         }
     }
 
+    /** M7-4: Favorites bearbeiten & löschen
+     * - Pflanze dauerhaft aus Repository löschen
+     * - Liste neu speichern
+     * */
+
     //PFLANZE LÖSCHEN
     fun deletePlant(plantId: String) {
         val currentList = getAllPlants().toMutableList()
@@ -50,6 +64,10 @@ class PlantRepository(private val context: Context) {
     fun getPlantById(id: String): Plant? {
         return getAllPlants().find { it.id == id }
     }
+
+    /** M9-3: lokale Speicherung in JSON
+     * - Datei wird beim Zugriff gelesen (JSON->KOTLIN)
+     * */
 
     // LALLE PFLANZEN LADEN
     fun getAllPlants(): List<Plant> {
@@ -65,6 +83,10 @@ class PlantRepository(private val context: Context) {
             emptyList()
         }
     }
+
+    /** M9-2: lokale Speicherung in JSON
+     * - Pflanzen inkl. Pflegeinformation
+     * */
 
     // LISTE SPEICHERN
     private fun saveList(plants: List<Plant>) {

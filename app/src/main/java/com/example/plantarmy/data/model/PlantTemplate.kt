@@ -28,6 +28,12 @@ data class PlantTemplate(
             location = location,
             templateId = this.id,
             imageUrl = this.imageUrl, // Foto aus dem Register übernehmen
+
+            /** M4-4: Gießintervall für Pflanzen aus Register
+             * - Default, wenn kein Intervall vorhanden
+             * -> wird in Mappers definiert
+             * */
+
             wateringIntervalDays = this.defaultWateringIntervalDays,
             fertilizingIntervalDays = this.defaultFertilizingIntervalDays
 
