@@ -40,6 +40,9 @@ import com.example.plantarmy.ui.screens.AllPlantsScreen
 
 import com.example.plantarmy.ui.screens.PlantDetailsScreen
 
+import com.airbnb.lottie.compose.*
+import androidx.compose.ui.graphics.graphicsLayer
+
 // Deep-link keys (aus NotificationIntent)
 private const val EXTRA_OPEN_SCREEN = "open_screen"
 private const val EXTRA_PLANT_ID = "plant_id"
@@ -273,42 +276,61 @@ fun PlantArmyScreen(
     }
 }
 
+
 @Composable
 fun HomeScreenContent(
     onRegisterClick: () -> Unit,
     onCreateClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.plant_army_logo),
-            contentDescription = "Plant Army Logo",
-            modifier = Modifier.size(100.dp)
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // 🌿 Lottie oben rechts im HINTERGRUND
+        val composition by rememberLottieComposition(
+            LottieCompositionSpec.RawRes(R.raw.hanging_plant)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Plant Army",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier
+                .size(160.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = (-8).dp, y = 12.dp)   // fein justieren
+                .graphicsLayer(alpha = 0.35f)     // dezent im Hintergrund
         )
 
-        Spacer(modifier = Modifier.height(60.dp))
+        // Vordergrund: dein bisheriger Content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.plant_army_logo),
+                contentDescription = "Plant Army Logo",
+                modifier = Modifier.size(100.dp)
+            )
 
-        PlantMenuButton(text = "Add plant", onClick = onRegisterClick)
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Plant Army",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
 
-        PlantMenuButton(text = "Create plant", onClick = onCreateClick)
+            Spacer(modifier = Modifier.height(60.dp))
+
+            PlantMenuButton(text = "Pflanze anlegen", onClick = onRegisterClick)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            PlantMenuButton(text = "Pflanze erstellen", onClick = onCreateClick)
+        }
     }
 }
-
 @Composable
 fun PlantMenuButton(text: String, onClick: () -> Unit) {
     Button(
