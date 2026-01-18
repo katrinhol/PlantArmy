@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,12 +15,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,15 +30,11 @@ import com.example.plantarmy.ui.screens.FavoritesScreen
 import com.example.plantarmy.ui.screens.PlantArmyTheme
 import com.example.plantarmy.ui.screens.SettingsScreen
 import com.example.plantarmy.ui.screens.PlantRegisterScreen
-import com.example.plantarmy.ui.screens.SettingsScreen
 import com.example.plantarmy.workers.ReminderScheduler
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import androidx.compose.material.icons.filled.List
 import com.example.plantarmy.ui.screens.AllPlantsScreen
-
 import com.example.plantarmy.ui.screens.PlantDetailsScreen
-
 import com.airbnb.lottie.compose.*
 import androidx.compose.ui.graphics.graphicsLayer
 import com.example.plantarmy.ui.screens.AddCareActionScreen
@@ -51,9 +46,7 @@ private const val EXTRA_PLANT_ID = "plant_id"
 private const val SCREEN_FAVORITES = "FAVORITES"
 private const val SCREEN_CARE_ACTION = "CARE_ACTION"
 
-
 class MainActivity : ComponentActivity() {
-
 
     // --------------------------------- BENACHRICHTIGUNGEN --------------------------------- //
 
@@ -64,12 +57,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         /** M5-4: Benachrichtigung, sobald Intervall abläuft
          * - Systemweite Ausführung - Start
          * - ruft ReminderScheduler Klasse auf
          * */
-
         ReminderScheduler.start(applicationContext)
 
         /** C3-1: Random Plant Facts
@@ -117,7 +108,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
 
 val PlantGreen = Color(0xFF8BC34A)
@@ -152,7 +142,6 @@ fun PlantArmyScreen(
             // Leiste nur anzeigen, wenn nicht in Register oder Create Plant Maske
             if (currentScreen != AppScreen.PLANT_REGISTER && currentScreen != AppScreen.CREATE_PLANT) {
 
-
                 NavigationBar(containerColor = Color.White) {
                     NavigationBarItem(
                         icon = {
@@ -181,13 +170,13 @@ fun PlantArmyScreen(
                      * - Button, der zu Überischt Favorites führt
                      * - Next: FavoritesScreen
                      * */
-
                     NavigationBarItem(
                         icon = {
                             Icon(
                                 Icons.Default.Star,
                                 contentDescription = "Favorites",
-                                tint = if (currentScreen == AppScreen.FAVORITES) Color(0xFFFFD700) else Color.Gray
+                                tint = if (currentScreen == AppScreen.FAVORITES)
+                                    Color(0xFFFFD700) else Color.Gray
                             )
                         },
                         selected = currentScreen == AppScreen.FAVORITES,
@@ -209,94 +198,86 @@ fun PlantArmyScreen(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            //when wie switch
-            when (currentScreen) {
 
-                // State: HOME-SCREEN
-                AppScreen.HOME -> HomeScreenContent(
+        // -------------------------- WICHTIGE ÄNDERUNG --------------------------
+        // Content (MIT Padding) und Deko (OHNE Padding) werden getrennt
+        Box(modifier = Modifier.fillMaxSize()) {
 
-                    // Pflanze anlegen - Button -> PLANT_REGISTER-SCREEN
-                    onRegisterClick = { currentScreen = AppScreen.PLANT_REGISTER },
+            // Content MIT innerPadding
+            Box(modifier = Modifier.padding(innerPadding)) {
 
-                    // Pflanze erstellen - Button -> CREATE_PLANT-SCREEN
-                    onCreateClick = {
-                        editingPlantId = null
-                        currentScreen = AppScreen.CREATE_PLANT
+                //when wie switch
+                when (currentScreen) {
+
+                    // State: HOME-SCREEN
+                    AppScreen.HOME -> HomeScreenContent(
+                        onRegisterClick = { currentScreen = AppScreen.PLANT_REGISTER },
+                        onCreateClick = {
+                            editingPlantId = null
+                            currentScreen = AppScreen.CREATE_PLANT
+                        }
+                    )
+
+                    AppScreen.ADD_CARE_ACTION -> AddCareActionScreen(
+                        onBack = { currentScreen = AppScreen.FAVORITES }
+                    )
+
+                    // State: FAVORITES-SCREEN
+                    AppScreen.FAVORITES -> FavoritesScreen(
+                        onPlantClick = { plantId ->
+                            editingPlantId = plantId
+                            currentScreen = AppScreen.CREATE_PLANT
+                        },
+                        onAddCareActionClick = {
+                            currentScreen = AppScreen.ADD_CARE_ACTION
+                        }
+                    )
+
+                    AppScreen.ALL_PLANTS -> AllPlantsScreen(
+                        onPlantClick = { id ->
+                            selectedSpeciesId = id
+                            currentScreen = AppScreen.PLANT_DETAILS
+                        }
+                    )
+
+                    AppScreen.PLANT_DETAILS -> {
+                        val id = selectedSpeciesId
+                        if (id != null) {
+                            PlantDetailsScreen(
+                                speciesId = id,
+                                onBack = { currentScreen = AppScreen.ALL_PLANTS }
+                            )
+                        }
                     }
-                )
 
-                AppScreen.ADD_CARE_ACTION -> AddCareActionScreen(
-                    onBack = { currentScreen = AppScreen.FAVORITES }
-                )
+                    // State: SETTINGS-SCREEN
+                    AppScreen.SETTINGS -> SettingsScreen()
 
-                /** M6-3: Favorites bearbeiten & löschen
-                 * - Bei Klick auf Pflanze wird ID übergeben
-                 * - App wechselt in Bearbeitungsmodus
-                 * - Next: CreatePlant
-                 * */
+                    // State: CREATE_PLANT-SCREEN
+                    AppScreen.CREATE_PLANT -> CreatePlantScreen(
+                        plantIdToEdit = editingPlantId,
+                        onBack = {
+                            currentScreen =
+                                if (editingPlantId != null) AppScreen.FAVORITES else AppScreen.HOME
+                        },
+                        onSaveSuccess = { currentScreen = AppScreen.FAVORITES }
+                    )
 
-                /** M7-1: Favorites bearbeiten & löschen
-                 * - Bei Klick auf Pflanze wird ID übergeben
-                 * - App wechselt in Bearbeitungsmodus
-                 * - Next: CreatePlant
-                 * */
-
-                // State: FAVORITES-SCREEN
-                AppScreen.FAVORITES -> FavoritesScreen(
-                    onPlantClick = { plantId ->
-                        editingPlantId = plantId
-                        currentScreen = AppScreen.CREATE_PLANT
-                    },
-                    onAddCareActionClick = {
-                        currentScreen = AppScreen.ADD_CARE_ACTION
-                    }
-                )
-
-                AppScreen.ALL_PLANTS -> AllPlantsScreen(
-                    onPlantClick = { id ->
-                        selectedSpeciesId = id
-                        currentScreen = AppScreen.PLANT_DETAILS
-                    }
-                )
-
-                AppScreen.PLANT_DETAILS -> {
-                    val id = selectedSpeciesId
-                    if (id != null) {
-                        PlantDetailsScreen(
-                            speciesId = id,
-                            onBack = { currentScreen = AppScreen.ALL_PLANTS }
-                        )
-                    } else {
-                        currentScreen = AppScreen.ALL_PLANTS
-                    }
+                    // State: PLANT_REGISTER-SCREEN (Pflanze anlegen)
+                    AppScreen.PLANT_REGISTER -> PlantRegisterScreen(
+                        onBack = { currentScreen = AppScreen.HOME },
+                        onPlantAdded = { currentScreen = AppScreen.FAVORITES }
+                    )
                 }
+            }
 
-                // State: SETTINGS-SCREEN
-                AppScreen.SETTINGS -> SettingsScreen()
-
-                // State: CREATE_PLANT-SCREEN
-                AppScreen.CREATE_PLANT -> CreatePlantScreen(
-                    // ID weitergeben (null - neu angelegt; ID - bearbeitet)
-                    plantIdToEdit = editingPlantId,
-                    onBack = {
-                        // Zurück, woher gekommen -> Favorites oder Home)
-                        currentScreen = if (editingPlantId != null) AppScreen.FAVORITES else AppScreen.HOME
-                    },
-
-                    onSaveSuccess = { currentScreen = AppScreen.FAVORITES }
-                )
-
-                // State: PLANT_REGISTER-SCREEN (Pflanze anlegen)
-                AppScreen.PLANT_REGISTER -> PlantRegisterScreen(
-                    onBack = { currentScreen = AppScreen.HOME },
-                    onPlantAdded = { currentScreen = AppScreen.FAVORITES }
-                )
+            // Pflanzenreihe OHNE Padding → direkt an BottomNavigationBar
+            if (currentScreen == AppScreen.HOME) {
+                BottomPlantsDecoration()
             }
         }
     }
 }
-
 
 @Composable
 fun HomeScreenContent(
@@ -310,20 +291,6 @@ fun HomeScreenContent(
             LottieCompositionSpec.RawRes(R.raw.hanging_plant)
         )
 
-        // 🌿 NEU: Lottie unten als Background (edge-to-edge)
-        val bottomComposition by rememberLottieComposition(
-            LottieCompositionSpec.RawRes(R.raw.plants_main_screen)
-        )
-
-        LottieAnimation(
-            composition = bottomComposition,
-            iterations = LottieConstants.IterateForever,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(260.dp)
-                .align(Alignment.BottomCenter)
-                .graphicsLayer(alpha = 0.35f)
-        )
         LottieAnimation(
             composition = composition,
             iterations = LottieConstants.IterateForever,
@@ -343,13 +310,22 @@ fun HomeScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.plant_army_logo),
-                contentDescription = "Plant Army Logo",
-                modifier = Modifier.size(100.dp)
+
+            /** Image( //PLANT-ARMY LOGO
+             * painter = painterResource(id = R.drawable.plant_army_logo),
+             * contentDescription = "Plant Army Logo",
+             * modifier = Modifier.size(100.dp)
+             * )*/
+
+            val logoComposition by rememberLottieComposition(
+                LottieCompositionSpec.RawRes(R.raw.walking_plant)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            LottieAnimation(
+                composition = logoComposition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier.size(250.dp)
+            )
 
             Text(
                 text = "Plant Army",
@@ -357,16 +333,38 @@ fun HomeScreenContent(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             PlantMenuButton(text = "Add plant", onClick = onRegisterClick)
-
             Spacer(modifier = Modifier.height(24.dp))
-
             PlantMenuButton(text = "Create Plant", onClick = onCreateClick)
         }
     }
 }
+
+// --------------------------------- UNTERE PFLANZEN-DEKO --------------------------------- //
+@Composable
+fun BottomPlantsDecoration() {
+
+    // 🌿 NEU: Lottie unten als Background (edge-to-edge)
+    val bottomComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.plants_main_screen)
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LottieAnimation(
+            composition = bottomComposition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+                .align(Alignment.BottomCenter)
+                .graphicsLayer(alpha = 0.35f)
+        )
+    }
+}
+
+// --------------------------------- BUTTON --------------------------------- //
 @Composable
 fun PlantMenuButton(text: String, onClick: () -> Unit) {
     Button(
