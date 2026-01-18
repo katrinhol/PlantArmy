@@ -19,15 +19,26 @@ fun PerenualPlantDto.toPlantTemplate(): PlantTemplate {
         else -> 7
     }
 
-    // Sonnenlicht formatieren
+// Sunlight formatieren
     val rawSunlight = this.sunlight
-    val light = when (rawSunlight) {
-        // Fall 1: Es ist eine Liste (z.B. ["Full sun", "Part shade"])
-        is List<*> -> rawSunlight.joinToString(", ") { it.toString() }
-        // Fall 2: Es ist bereits ein Text (z.B. "Full sun")
-        is String -> rawSunlight
-        // Fall 3: Es ist null oder etwas anderes
-        else -> "Unknown"
+    val lightList: List<String> = when (rawSunlight) {
+        is List<*> -> rawSunlight.filterIsInstance<String>()
+        is String -> listOf(rawSunlight)
+        else -> emptyList()
+    }
+
+    val light = if (lightList.isEmpty()) {
+        "" // <- wichtig: leer statt "Unknown", dann wird es in Favorites nicht angezeigt
+    } else {
+        lightList.joinToString(", ") { s ->
+            when (s.lowercase().trim()) {
+                "full sun" -> "Sunny"
+                "part shade", "partial shade" -> "Partial shade"
+                "full shade" -> "Shade"
+                "sun-part shade", "sun/part shade", "sun - part shade" -> "Sun / partial shade"
+                else -> s.replaceFirstChar { it.uppercase() } // fallback: hübsch formatieren
+            }
+        }
     }
 
     // Ein sicheres PlantTemplate zurückgeben
